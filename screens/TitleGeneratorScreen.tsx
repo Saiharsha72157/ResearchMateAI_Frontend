@@ -58,12 +58,10 @@ export default function TitleGeneratorScreen() {
   const [dropdownOpen, setDropdownOpen] = useState<DropdownType>(null);
   const [loading, setLoading] = useState(false);
   const [projects, setProjects] = useState<ProjectItem[]>([]);
-  const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   // Bookmarking System State
   const [bookmarks, setBookmarks] = useState<TitleBookmark[]>([]);
-  const [bookmarksModalOpen, setBookmarksModalOpen] = useState(false);
 
   // Fetch bookmarks on mount
   useEffect(() => {
@@ -196,7 +194,7 @@ export default function TitleGeneratorScreen() {
             <Ionicons name="arrow-back" size={24} color={themeColors.text} />
           </TouchableOpacity>
 
-          <TouchableOpacity onPress={() => setBookmarksModalOpen(true)}>
+          <TouchableOpacity onPress={() => navigation.navigate("SavedResearch")}>
             <Ionicons name="bookmarks-outline" size={24} color={themeColors.text} />
           </TouchableOpacity>
         </View>
@@ -269,7 +267,19 @@ export default function TitleGeneratorScreen() {
                 <TouchableOpacity
                   key={index}
                   style={[styles.topicCard, { backgroundColor: themeColors.card }]}
-                  onPress={() => setSelectedProject(item)}
+                  onPress={() => {
+                    const plan = {
+                      title: item.title,
+                      difficulty: item.difficulty,
+                      department: selectedDepartment || "Research",
+                      domain: selectedDomain || "AI",
+                      algorithms: item.algorithms || [],
+                      summary: item.summary,
+                      dataset: item.dataset,
+                      best_algorithms_explanation: item.best_algorithms_explanation,
+                    };
+                    navigation.navigate("ResearchDetails", { plan });
+                  }}
                   activeOpacity={0.9}
                 >
                   <View style={styles.cardHeader}>
@@ -317,74 +327,7 @@ export default function TitleGeneratorScreen() {
         )}
       </ScrollView>
 
-      {/* Dynamic Project Details Summary Modal */}
-      <Modal
-        visible={selectedProject !== null}
-        transparent={true}
-        statusBarTranslucent={true}
-        animationType="slide"
-        onRequestClose={() => setSelectedProject(null)}
-      >
-        <View style={[styles.detailsModalOverlay, { backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(108, 62, 244, 0.25)" }]}>
-          <View style={[styles.detailsModalContent, { backgroundColor: themeColors.card, borderColor: themeColors.border, borderWidth: isDark ? 1 : 0 }]}>
-            {/* Header */}
-            <View style={[styles.detailsModalHeader, { borderBottomColor: themeColors.border }]}>
-              <Text style={[styles.detailsModalTitleText, { color: themeColors.text }]}>Project Details & Plan</Text>
-              <TouchableOpacity onPress={() => setSelectedProject(null)}>
-                <Ionicons name="close" size={24} color={themeColors.text} />
-              </TouchableOpacity>
-            </View>
 
-            {selectedProject && (
-              <ScrollView showsVerticalScrollIndicator={false} style={styles.detailsModalScroll}>
-                {/* Project Title */}
-                <Text style={[styles.detailsProjectTitle, { color: themeColors.text }]}>{selectedProject.title}</Text>
-
-                {/* Difficulty Pill */}
-                <View style={styles.detailsDifficultyRow}>
-                  <View style={[
-                    styles.difficultyPill,
-                    { backgroundColor: getDifficultyStyles(selectedProject.difficulty).bg, marginVertical: 0 }
-                  ]}>
-                    <Text style={[
-                      styles.difficultyText,
-                      { color: getDifficultyStyles(selectedProject.difficulty).text }
-                    ]}>
-                      {selectedProject.difficulty}
-                    </Text>
-                  </View>
-                </View>
-
-                {/* Summary */}
-                <View style={styles.detailsSection}>
-                  <Text style={[styles.detailsSectionTitle, { color: themeColors.primary }]}>Project Summary</Text>
-                  <Text style={[styles.detailsSectionContent, { color: themeColors.text }]}>{selectedProject.summary}</Text>
-                </View>
-
-                {/* Dataset to Use */}
-                <View style={styles.detailsSection}>
-                  <Text style={[styles.detailsSectionTitle, { color: themeColors.primary }]}>Dataset to Use</Text>
-                  <Text style={[styles.detailsSectionContent, { color: themeColors.text }]}>{selectedProject.dataset}</Text>
-                </View>
-
-                {/* Best Algorithms & Why */}
-                <View style={styles.detailsSection}>
-                  <Text style={[styles.detailsSectionTitle, { color: themeColors.primary }]}>Recommended Algorithms & Why They Are Best</Text>
-                  <Text style={[styles.detailsSectionContent, { color: themeColors.text }]}>{selectedProject.best_algorithms_explanation}</Text>
-                </View>
-              </ScrollView>
-            )}
-
-            {/* Close Button */}
-            <TouchableOpacity 
-              style={[styles.detailsCloseBtn, { backgroundColor: themeColors.primary }]}
-              onPress={() => setSelectedProject(null)}
-            >
-              <Text style={styles.detailsCloseBtnText}>Done</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
 
       <Modal
         visible={dropdownOpen !== null}
@@ -416,84 +359,6 @@ export default function TitleGeneratorScreen() {
         </Pressable>
       </Modal>
 
-      {/* Bookmarks Modal */}
-      <Modal
-        visible={bookmarksModalOpen}
-        transparent={true}
-        statusBarTranslucent={true}
-        animationType="slide"
-        onRequestClose={() => setBookmarksModalOpen(false)}
-      >
-        <View style={[styles.detailsModalOverlay, { backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(108, 62, 244, 0.25)" }]}>
-          <View style={[styles.detailsModalContent, { backgroundColor: themeColors.card, borderColor: themeColors.border, borderWidth: isDark ? 1 : 0 }]}>
-            {/* Header */}
-            <View style={[styles.detailsModalHeader, { borderBottomColor: themeColors.border }]}>
-              <Text style={[styles.detailsModalTitleText, { color: themeColors.text }]}>Bookmarked Topics</Text>
-              <TouchableOpacity onPress={() => setBookmarksModalOpen(false)}>
-                <Ionicons name="close" size={24} color={themeColors.text} />
-              </TouchableOpacity>
-            </View>
-
-            <ScrollView showsVerticalScrollIndicator={false} style={styles.detailsModalScroll}>
-              {bookmarks.length === 0 ? (
-                <View style={{ alignItems: "center", paddingVertical: 40 }}>
-                  <Ionicons name="bookmark-outline" size={48} color={themeColors.subText} />
-                  <Text style={{ color: themeColors.text, fontSize: 16, fontWeight: "bold", marginTop: 12 }}>No Bookmarks Saved</Text>
-                  <Text style={{ color: themeColors.subText, fontSize: 14, textAlign: "center", marginTop: 6, paddingHorizontal: 20 }}>
-                    Click the bookmark icon on generated research topics to save them here permanently!
-                  </Text>
-                </View>
-              ) : (
-                bookmarks.map((bookmark) => (
-                  <View
-                    key={bookmark.id}
-                    style={[styles.topicCard, { backgroundColor: isDark ? "#24242B" : "#F9FAFB", borderColor: themeColors.border, borderWidth: 1, padding: 16, marginBottom: 12 }]}
-                  >
-                    <View style={styles.cardHeader}>
-                      <TouchableOpacity 
-                        style={{ flex: 1 }}
-                        onPress={() => {
-                          setSelectedProject({
-                            title: bookmark.title,
-                            difficulty: bookmark.difficulty as any,
-                            algorithms: bookmark.algorithms,
-                            summary: bookmark.summary,
-                            dataset: bookmark.dataset,
-                            best_algorithms_explanation: bookmark.best_algorithms_explanation
-                          });
-                          setBookmarksModalOpen(false);
-                        }}
-                      >
-                        <Text style={[styles.topicTitle, { color: themeColors.text, fontSize: 16, lineHeight: 22 }]}>{bookmark.title}</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity 
-                        onPress={async () => {
-                          await removeTitleBookmark(bookmark.title);
-                          setBookmarks((prev) => prev.filter((b) => b.title !== bookmark.title));
-                        }}
-                        style={{ padding: 4 }}
-                      >
-                        <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                      </TouchableOpacity>
-                    </View>
-                    <Text style={{ color: themeColors.subText, fontSize: 11, fontStyle: "italic" }}>
-                      {bookmark.department} • {bookmark.domain}
-                    </Text>
-                  </View>
-                ))
-              )}
-            </ScrollView>
-
-            {/* Close Button */}
-            <TouchableOpacity 
-              style={[styles.detailsCloseBtn, { backgroundColor: themeColors.primary }]}
-              onPress={() => setBookmarksModalOpen(false)}
-            >
-              <Text style={styles.detailsCloseBtnText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }

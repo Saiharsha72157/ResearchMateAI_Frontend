@@ -46,76 +46,12 @@ export default function ProfileScreen() {
   const [bio, setBio] = useState("");
   const [updating, setUpdating] = useState(false);
 
-  // Saved Research States
-  const [bookmarksModalVisible, setBookmarksModalVisible] = useState(false);
-  const [bookmarksList, setBookmarksList] = useState<TitleBookmark[]>([]);
-  const [bookmarksLoading, setBookmarksLoading] = useState(false);
-  const [selectedBookmark, setSelectedBookmark] = useState<TitleBookmark | null>(null);
-
   const openEditModal = () => {
     setFullName(user?.fullName || "");
     setUsername(user?.username || "");
     setMobile(user?.mobile || "");
     setBio(user?.bio || "");
     setEditModalVisible(true);
-  };
-
-  const openBookmarksModal = async () => {
-    setBookmarksModalVisible(true);
-    await fetchBookmarks();
-  };
-
-  const fetchBookmarks = async () => {
-    try {
-      setBookmarksLoading(true);
-      const data = await getTitleBookmarks();
-      setBookmarksList(data);
-    } catch (err) {
-      console.error("[PROFILE] Failed to fetch bookmarks:", err);
-    } finally {
-      setBookmarksLoading(false);
-    }
-  };
-
-  const handleRemoveBookmark = (title: string) => {
-    Alert.alert(
-      "Remove Bookmark",
-      "Are you sure you want to remove this research topic from your saved list?",
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Remove",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              await removeTitleBookmark(title);
-              setBookmarksList((prev) => prev.filter((b) => b.title !== title));
-            } catch (err) {
-              console.error("[PROFILE] Failed to delete bookmark:", err);
-            }
-          }
-        }
-      ]
-    );
-  };
-
-  const getDifficultyStyles = (difficulty: string) => {
-    if (difficulty === "Easy") {
-      return {
-        bg: isDark ? "#102A20" : "#DEF7EC",
-        text: isDark ? "#52B788" : "#03543F",
-      };
-    } else if (difficulty === "Medium") {
-      return {
-        bg: isDark ? "#3A2A10" : "#FEF08A",
-        text: isDark ? "#FAD02C" : "#713F12",
-      };
-    } else {
-      return {
-        bg: isDark ? "#4A1A1A" : "#FDE8E8",
-        text: isDark ? "#F87171" : "#9B1C1C",
-      };
-    }
   };
 
   const handleSaveProfile = async () => {
@@ -275,7 +211,7 @@ export default function ProfileScreen() {
 
           <TouchableOpacity 
             style={[styles.actionRow, { borderBottomColor: themeColors.border }]}
-            onPress={openBookmarksModal}
+            onPress={() => navigation.navigate("SavedResearch")}
           >
             <View style={styles.rowLeft}>
               <Ionicons
@@ -462,142 +398,6 @@ export default function ProfileScreen() {
         </View>
       </Modal>
 
-      {/* Saved Research Plans List Modal */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={bookmarksModalVisible}
-        onRequestClose={() => setBookmarksModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: themeColors.text }]}>
-                Saved Research Plans
-              </Text>
-              <TouchableOpacity onPress={() => setBookmarksModalVisible(false)}>
-                <Ionicons name="close" size={24} color={themeColors.text} />
-              </TouchableOpacity>
-            </View>
-
-            {bookmarksLoading ? (
-              <ActivityIndicator color="#6C3EF4" size="large" style={{ marginVertical: 40 }} />
-            ) : bookmarksList.length === 0 ? (
-              <View style={{ alignItems: "center", paddingVertical: 40 }}>
-                <Ionicons name="bookmark-outline" size={48} color={themeColors.subText} />
-                <Text style={{ color: themeColors.text, fontSize: 16, fontWeight: "bold", marginTop: 12 }}>No Saved Plans</Text>
-                <Text style={{ color: themeColors.subText, fontSize: 14, textAlign: "center", marginTop: 6, paddingHorizontal: 20 }}>
-                  Generate and bookmark research topics from the Title Generator screen to view them here.
-                </Text>
-              </View>
-            ) : (
-              <ScrollView showsVerticalScrollIndicator={false}>
-                {bookmarksList.map((item) => (
-                  <TouchableOpacity
-                    key={item.id}
-                    style={[styles.faqCard, { backgroundColor: isDark ? "#1F2937" : "#F9FAFB", borderColor: themeColors.border, padding: 16, marginBottom: 12, borderWidth: 1 }]}
-                    onPress={() => setSelectedBookmark(item)}
-                    activeOpacity={0.8}
-                  >
-                    <View style={styles.cardHeader}>
-                      <Text style={[styles.faqQuestion, { color: themeColors.text, fontSize: 16, lineHeight: 22, fontWeight: "800", flex: 1 }]}>
-                        {item.title}
-                      </Text>
-                      <TouchableOpacity 
-                        onPress={() => handleRemoveBookmark(item.title)}
-                        style={{ padding: 4 }}
-                      >
-                        <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                      </TouchableOpacity>
-                    </View>
-
-                    <Text style={{ color: themeColors.subText, fontSize: 12, marginTop: 4 }}>
-                      {item.department} • {item.domain}
-                    </Text>
-
-                    <View style={[styles.difficultyPill, { backgroundColor: getDifficultyStyles(item.difficulty).bg, marginTop: 10 }]}>
-                      <Text style={[styles.difficultyText, { color: getDifficultyStyles(item.difficulty).text }]}>
-                        {item.difficulty}
-                      </Text>
-                    </View>
-
-                    <View style={[styles.algoPillsContainer, { marginTop: 10, flexDirection: "row", flexWrap: "wrap", gap: 6 }]}>
-                      {item.algorithms && item.algorithms.map((algo, idx) => (
-                        <View key={idx} style={[styles.algoPill, { backgroundColor: isDark ? "#1E2A3D" : "#E0F2FE", paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6 }]}>
-                          <Text style={[styles.algoPillText, { color: isDark ? "#38BDF8" : "#0369A1", fontSize: 11 }]}>{algo}</Text>
-                        </View>
-                      ))}
-                    </View>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-            )}
-
-            <TouchableOpacity 
-              style={[styles.detailsCloseBtn, { backgroundColor: themeColors.primary, marginTop: 15 }]}
-              onPress={() => setBookmarksModalVisible(false)}
-            >
-              <Text style={styles.detailsCloseBtnText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Bookmarked Plan Detail Modal */}
-      <Modal
-        visible={selectedBookmark !== null}
-        transparent={true}
-        statusBarTranslucent={true}
-        animationType="slide"
-        onRequestClose={() => setSelectedBookmark(null)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: themeColors.card, maxHeight: "80%" }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: themeColors.text }]}>Research Plan Details</Text>
-              <TouchableOpacity onPress={() => setSelectedBookmark(null)}>
-                <Ionicons name="close" size={24} color={themeColors.text} />
-              </TouchableOpacity>
-            </View>
-
-            {selectedBookmark && (
-              <ScrollView showsVerticalScrollIndicator={false}>
-                <Text style={[styles.detailsProjectTitle, { color: themeColors.text, fontSize: 20, fontWeight: "800", marginBottom: 12, lineHeight: 28 }]}>
-                  {selectedBookmark.title}
-                </Text>
-
-                <View style={[styles.difficultyPill, { backgroundColor: getDifficultyStyles(selectedBookmark.difficulty).bg, marginBottom: 16 }]}>
-                  <Text style={[styles.difficultyText, { color: getDifficultyStyles(selectedBookmark.difficulty).text }]}>
-                    {selectedBookmark.difficulty}
-                  </Text>
-                </View>
-
-                <View style={styles.detailsSection}>
-                  <Text style={[styles.detailsSectionTitle, { color: themeColors.primary }]}>Project Summary</Text>
-                  <Text style={[styles.detailsSectionContent, { color: themeColors.text }]}>{selectedBookmark.summary}</Text>
-                </View>
-
-                <View style={styles.detailsSection}>
-                  <Text style={[styles.detailsSectionTitle, { color: themeColors.primary }]}>Dataset to Use</Text>
-                  <Text style={[styles.detailsSectionContent, { color: themeColors.text }]}>{selectedBookmark.dataset}</Text>
-                </View>
-
-                <View style={styles.detailsSection}>
-                  <Text style={[styles.detailsSectionTitle, { color: themeColors.primary }]}>Recommended Algorithms & Why They Are Best</Text>
-                  <Text style={[styles.detailsSectionContent, { color: themeColors.text }]}>{selectedBookmark.best_algorithms_explanation}</Text>
-                </View>
-              </ScrollView>
-            )}
-
-            <TouchableOpacity 
-              style={[styles.detailsCloseBtn, { backgroundColor: themeColors.primary, marginTop: 15 }]}
-              onPress={() => setSelectedBookmark(null)}
-            >
-              <Text style={styles.detailsCloseBtnText}>Done</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
     </View>
   );
 }

@@ -12,6 +12,8 @@ import OnboardingTwo from "../screens/OnboardingTwo";
 import TitleGeneratorScreen from "../screens/TitleGeneratorScreen";
 import LanguageSettingsScreen from "../screens/LanguageSettingsScreen";
 import HelpSupportScreen from "../screens/HelpSupportScreen";
+import SavedResearchScreen from "../screens/SavedResearchScreen";
+import ResearchDetailsScreen from "../screens/ResearchDetailsScreen";
 
 import BottomTabs from "./BottomTabs";
 
@@ -47,6 +49,8 @@ export default function AppNavigator() {
           <Stack.Screen name="TitleGenerator" component={TitleGeneratorScreen} />
           <Stack.Screen name="LanguageSettings" component={LanguageSettingsScreen} />
           <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
+          <Stack.Screen name="SavedResearch" component={SavedResearchScreen} />
+          <Stack.Screen name="ResearchDetails" component={ResearchDetailsScreen} />
         </>
       )}
     </Stack.Navigator>
