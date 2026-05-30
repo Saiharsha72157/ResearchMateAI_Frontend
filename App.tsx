@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import { StatusBar } from "expo-status-bar";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { Platform } from "react-native";
 import React, { useEffect } from "react";
 
 import AppNavigator from "./navigation/AppNavigator";
@@ -30,7 +31,7 @@ export default function App() {
           <AuthProvider>
             <ErrorBoundary>
               <NavigationContainer>
-                <StatusBar style="auto" />
+                {Platform.OS !== "web" && <StatusBar style="auto" />}
                 <AppNavigator />
               </NavigationContainer>
             </ErrorBoundary>
@@ -40,3 +41,4 @@ export default function App() {
     </GestureHandlerRootView>
   );
 }
+

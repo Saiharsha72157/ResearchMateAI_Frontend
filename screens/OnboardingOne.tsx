@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  Platform,
 } from "react-native";
 
 import { useTranslation } from "../services/localization";
@@ -49,76 +50,78 @@ export default function OnboardingOne() {
 
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
 
-      <View style={styles.topRow}>
+      <View style={styles.formCard}>
+        <View style={styles.topRow}>
 
-        <View style={styles.dotsContainer}>
-          <View style={[styles.dot, styles.activeDot, { backgroundColor: themeColors.primary }]} />
-          <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
-          <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
+          <View style={styles.dotsContainer}>
+            <View style={[styles.dot, styles.activeDot, { backgroundColor: themeColors.primary }]} />
+            <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
+            <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
+          </View>
+
+          <TouchableOpacity
+            onPress={handleSkip}
+          >
+            <Text style={[styles.skip, { color: themeColors.subText }]}>
+              {t("skip")}
+            </Text>
+          </TouchableOpacity>
+
         </View>
 
-        <TouchableOpacity
-          onPress={handleSkip}
-        >
-          <Text style={[styles.skip, { color: themeColors.subText }]}>
-            {t("skip")}
-          </Text>
-        </TouchableOpacity>
+        <View style={styles.centerSection}>
 
-      </View>
+          <View style={[styles.bigCircle, { backgroundColor: isDark ? "#2A1F52" : "#F1EEFF" }]}>
 
-      <View style={styles.centerSection}>
+            <View style={[styles.smallCircle, { backgroundColor: themeColors.card }]}>
 
-        <View style={[styles.bigCircle, { backgroundColor: isDark ? "#2A1F52" : "#F1EEFF" }]}>
+              <Ionicons
+                name="bulb-outline"
+                size={40}
+                color="#6C3EF4"
+              />
 
-          <View style={[styles.smallCircle, { backgroundColor: themeColors.card }]}>
+            </View>
 
-            <Ionicons
-              name="bulb-outline"
-              size={40}
-              color="#6C3EF4"
-            />
+          </View>
 
+          <View style={[styles.tag, styles.aiTag]}>
+            <Text style={styles.tagText}>AI</Text>
+          </View>
+
+          <View style={[styles.tag, styles.mlTag]}>
+            <Text style={styles.tagText}>ML</Text>
+          </View>
+
+          <View style={[styles.tag, styles.iotTag]}>
+            <Text style={styles.tagText}>IoT</Text>
           </View>
 
         </View>
 
-        <View style={[styles.tag, styles.aiTag]}>
-          <Text style={styles.tagText}>AI</Text>
+        <View style={styles.textSection}>
+
+          <Text style={[styles.title, { color: themeColors.text }]}>
+            {t("onboarding1_title")}
+          </Text>
+
+          <Text style={[styles.subtitle, { color: themeColors.subText }]}>
+            {t("onboarding1_sub")}
+          </Text>
+
         </View>
 
-        <View style={[styles.tag, styles.mlTag]}>
-          <Text style={styles.tagText}>ML</Text>
-        </View>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: themeColors.primary }]}
+          onPress={handleNext}
+        >
 
-        <View style={[styles.tag, styles.iotTag]}>
-          <Text style={styles.tagText}>IoT</Text>
-        </View>
+          <Text style={styles.buttonText}>
+            {t("next")}
+          </Text>
 
+        </TouchableOpacity>
       </View>
-
-      <View style={styles.textSection}>
-
-        <Text style={[styles.title, { color: themeColors.text }]}>
-          {t("onboarding1_title")}
-        </Text>
-
-        <Text style={[styles.subtitle, { color: themeColors.subText }]}>
-          {t("onboarding1_sub")}
-        </Text>
-
-      </View>
-
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: themeColors.primary }]}
-        onPress={handleNext}
-      >
-
-        <Text style={styles.buttonText}>
-          {t("next")}
-        </Text>
-
-      </TouchableOpacity>
 
     </View>
 
@@ -131,8 +134,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: Platform.OS === "web" ? 20 : 60,
     paddingBottom: 40,
+    justifyContent: "space-between",
+    alignItems: Platform.OS === "web" ? "center" : undefined,
+  },
+
+  formCard: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 520 : undefined,
+    flex: 1,
     justifyContent: "space-between",
   },
 
@@ -198,20 +209,20 @@ const styles = StyleSheet.create({
 
   aiTag: {
     backgroundColor: "#16A3FF",
-    left: 20,
+    left: Platform.OS === "web" ? 140 : 20,
     top: 80,
   },
 
   mlTag: {
     backgroundColor: "#22C55E",
-    right: 20,
+    right: Platform.OS === "web" ? 140 : 20,
     top: 90,
   },
 
   iotTag: {
     backgroundColor: "#D946EF",
-    right: 40,
-    bottom: 40,
+    right: Platform.OS === "web" ? 160 : 40,
+    bottom: Platform.OS === "web" ? 0 : 40,
   },
 
   tagText: {

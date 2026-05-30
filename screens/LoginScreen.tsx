@@ -27,6 +27,8 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [emailFocused, setEmailFocused] = useState(false);
+  const [passwordFocused, setPasswordFocused] = useState(false);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -93,89 +95,115 @@ export default function LoginScreen() {
         contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.logoContainer}>
-          <View style={styles.logoCircle}>
-            <Ionicons name="bulb-outline" size={36} color="#fff" />
-          </View>
-          <Text style={[styles.logoText, { color: themeColors.primary }]}>
-            ResearchMate AI
-          </Text>
-        </View>
-
-        <View style={styles.textContainer}>
-          <Text style={[styles.title, { color: themeColors.text }]}>
-            {t("welcome_back")}
-          </Text>
-          <Text style={[styles.subtitle, { color: themeColors.subText }]}>
-            Sign in with your email address
-          </Text>
-        </View>
-
-        <View style={styles.form}>
-          <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
-            <Ionicons name="mail-outline" size={24} color={themeColors.subText} style={styles.icon} />
-            <TextInput
-              placeholder="Email Address"
-              placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              style={[styles.input, { color: themeColors.text }]}
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
-            <Ionicons name="lock-closed-outline" size={24} color={themeColors.subText} style={styles.icon} />
-            <TextInput
-              placeholder="Password"
-              placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              style={[styles.input, { color: themeColors.text }]}
-            />
-          </View>
-
-          <TouchableOpacity style={styles.forgotPassword} onPress={handleForgotPassword} disabled={loading}>
-            <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, loading && { opacity: 0.8 }]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Login</Text>
-            )}
-          </TouchableOpacity>
-
-          <View style={styles.dividerContainer}>
-            <View style={[styles.line, { backgroundColor: themeColors.border }]} />
-            <Text style={styles.orText}>{t("or")}</Text>
-            <View style={[styles.line, { backgroundColor: themeColors.border }]} />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.googleButton, { backgroundColor: themeColors.card }]}
-            onPress={handleGoogleLogin}
-          >
-            <Ionicons name="logo-google" size={24} color="#EA4335" />
-            <Text style={[styles.googleText, { color: themeColors.text }]}>
-              {t("continue_google")}
+        <View style={styles.formCard}>
+          <View style={styles.logoContainer}>
+            <View style={styles.logoCircle}>
+              <Ionicons name="bulb-outline" size={36} color="#fff" />
+            </View>
+            <Text style={[styles.logoText, { color: themeColors.primary }]}>
+              ResearchMate AI
             </Text>
-          </TouchableOpacity>
+          </View>
 
-          <View style={styles.footer}>
-            <Text style={[styles.footerText, { color: themeColors.subText }]}>
-              Don't have an account?{" "}
+          <View style={styles.textContainer}>
+            <Text style={[styles.title, { color: themeColors.text }]}>
+              {t("welcome_back")}
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-              <Text style={styles.footerLink}>Sign Up</Text>
+            <Text style={[styles.subtitle, { color: themeColors.subText }]}>
+              Sign in with your email address
+            </Text>
+          </View>
+
+          <View style={styles.form}>
+            {/* Email Input */}
+            <View style={[
+              styles.inputContainer,
+              { backgroundColor: themeColors.card },
+              emailFocused && styles.inputContainerFocused,
+            ]}>
+              <Ionicons
+                name="mail-outline"
+                size={20}
+                color={emailFocused ? "#6C3EF4" : themeColors.subText}
+                style={styles.icon}
+              />
+              <TextInput
+                placeholder="Email Address"
+                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                autoCapitalize="none"
+                onFocus={() => setEmailFocused(true)}
+                onBlur={() => setEmailFocused(false)}
+              />
+            </View>
+
+            {/* Password Input */}
+            <View style={[
+              styles.inputContainer,
+              { backgroundColor: themeColors.card },
+              passwordFocused && styles.inputContainerFocused,
+            ]}>
+              <Ionicons
+                name="lock-closed-outline"
+                size={20}
+                color={passwordFocused ? "#6C3EF4" : themeColors.subText}
+                style={styles.icon}
+              />
+              <TextInput
+                placeholder="Password"
+                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                onFocus={() => setPasswordFocused(true)}
+                onBlur={() => setPasswordFocused(false)}
+              />
+            </View>
+
+            <TouchableOpacity style={styles.forgotPassword} onPress={handleForgotPassword} disabled={loading}>
+              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
             </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[styles.button, loading && { opacity: 0.8 }]}
+              onPress={handleLogin}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Login</Text>
+              )}
+            </TouchableOpacity>
+
+            <View style={styles.dividerContainer}>
+              <View style={[styles.line, { backgroundColor: themeColors.border }]} />
+              <Text style={styles.orText}>{t("or")}</Text>
+              <View style={[styles.line, { backgroundColor: themeColors.border }]} />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.googleButton, { backgroundColor: themeColors.card }]}
+              onPress={handleGoogleLogin}
+            >
+              <Ionicons name="logo-google" size={24} color="#EA4335" />
+              <Text style={[styles.googleText, { color: themeColors.text }]}>
+                {t("continue_google")}
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.footer}>
+              <Text style={[styles.footerText, { color: themeColors.subText }]}>
+                Don't have an account?{" "}
+              </Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                <Text style={styles.footerLink}>Sign Up</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -187,36 +215,50 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 80,
+    paddingTop: Platform.OS === "web" ? 0 : 60,
     paddingBottom: 40,
+    alignItems: Platform.OS === "web" ? "center" : undefined,
+    justifyContent: Platform.OS === "web" ? "center" : undefined,
+    minHeight: Platform.OS === "web" ? ("100vh" as any) : undefined,
+  },
+  formCard: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 460 : undefined,
   },
   logoContainer: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 36,
   },
   logoCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 28,
+    width: 84,
+    height: 84,
+    borderRadius: 26,
     backgroundColor: "#6C3EF4",
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 18,
+    marginBottom: 14,
+    shadowColor: "#6C3EF4",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.3,
+    shadowRadius: 12,
+    elevation: 6,
   },
   logoText: {
-    fontSize: 30,
+    fontSize: 26,
     fontWeight: "bold",
+    letterSpacing: -0.5,
   },
   textContainer: {
-    marginBottom: 30,
+    marginBottom: 28,
   },
   title: {
-    fontSize: 34,
+    fontSize: 32,
     fontWeight: "bold",
-    marginBottom: 10,
+    marginBottom: 8,
+    letterSpacing: -0.5,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 15,
   },
   form: {
     flex: 1,
@@ -224,43 +266,64 @@ const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: "row",
     alignItems: "center",
-    borderRadius: 18,
-    marginBottom: 20,
+    borderRadius: 16,
+    marginBottom: 16,
     paddingHorizontal: 16,
-    elevation: 1,
+    borderWidth: 1.5,
+    borderColor: "transparent",
+  },
+  inputContainerFocused: {
+    borderColor: "#6C3EF4",
+    shadowColor: "#6C3EF4",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    elevation: 2,
   },
   icon: {
     marginRight: 10,
   },
   input: {
     flex: 1,
-    paddingVertical: 18,
-    fontSize: 16,
+    paddingVertical: 17,
+    fontSize: 15,
   },
+  // Web-only: removes the browser's default blue outline on <input>
+  inputWeb: {
+    outlineWidth: 0,
+    outlineStyle: "none",
+  } as any,
   forgotPassword: {
     alignSelf: "flex-end",
-    marginBottom: 24,
+    marginBottom: 22,
   },
   forgotPasswordText: {
     color: "#6C3EF4",
     fontWeight: "600",
+    fontSize: 14,
   },
   button: {
     backgroundColor: "#6C3EF4",
-    paddingVertical: 18,
-    borderRadius: 18,
-    marginBottom: 30,
+    paddingVertical: 17,
+    borderRadius: 16,
+    marginBottom: 28,
+    shadowColor: "#6C3EF4",
+    shadowOffset: { width: 0, height: 6 },
+    shadowOpacity: 0.25,
+    shadowRadius: 10,
+    elevation: 4,
   },
   buttonText: {
     color: "#fff",
     textAlign: "center",
     fontWeight: "bold",
-    fontSize: 18,
+    fontSize: 17,
+    letterSpacing: 0.3,
   },
   dividerContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 30,
+    marginBottom: 28,
   },
   line: {
     flex: 1,
@@ -270,19 +333,21 @@ const styles = StyleSheet.create({
     marginHorizontal: 16,
     color: "#9CA3AF",
     fontWeight: "600",
+    fontSize: 13,
   },
   googleButton: {
-    borderRadius: 18,
-    paddingVertical: 18,
+    borderRadius: 16,
+    paddingVertical: 16,
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    elevation: 1,
-    marginBottom: 30,
+    borderWidth: 1.5,
+    borderColor: "#E5E7EB",
+    marginBottom: 28,
   },
   googleText: {
     marginLeft: 12,
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: "600",
   },
   footer: {

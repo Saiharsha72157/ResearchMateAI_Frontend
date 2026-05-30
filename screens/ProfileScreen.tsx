@@ -117,6 +117,7 @@ export default function ProfileScreen() {
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
+        <View style={styles.contentWrapper}>
         <Text style={[styles.header, { color: themeColors.text }]}>
           {t("profile_header")}
         </Text>
@@ -301,6 +302,7 @@ export default function ProfileScreen() {
           </Text>
 
         </TouchableOpacity>
+        </View>
 
       </ScrollView>
 
@@ -408,7 +410,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F3F1FF",
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: Platform.OS === "web" ? 20 : 60,
+  },
+
+  contentWrapper: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 680 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" : undefined,
+    paddingBottom: 40,
   },
 
   header: {

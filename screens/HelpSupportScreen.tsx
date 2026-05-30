@@ -243,7 +243,8 @@ export default function HelpSupportScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 60,
+    paddingTop: Platform.OS === "web" ? 20 : 60,
+    alignItems: Platform.OS === "web" ? "center" as const : undefined,
   },
   header: {
     flexDirection: "row",
@@ -251,6 +252,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 20,
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 680 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
   },
   backButton: {
     width: 48,
@@ -266,6 +270,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 680 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
   },
   card: {
     borderRadius: 24,

@@ -420,210 +420,218 @@ export default function ParaphraseScreen() {
           keyboardShouldPersistTaps="handled"
           contentContainerStyle={styles.scrollContent}
         >
-          {/* TAB 1: PARAPHRASE ENGINE */}
-          {activeTab === "paraphrase" && (
-            <View>
-              {/* Screen Header */}
-              <View style={styles.screenHeader}>
-                <Text style={[styles.headerTitle, { color: themeColors.text }]}>{t("ai_paraphraser")}</Text>
-                <Text style={[styles.headerSubtitle, { color: themeColors.subText }]}>
-                  {t("rewrite_text_subtitle")}
-                </Text>
-              </View>
-
-              {/* Mode Scrollable Chips */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                style={styles.chipsBar}
-                contentContainerStyle={styles.chipsContent}
-              >
-                {modes.map((m) => (
-                  <TouchableOpacity
-                    key={m.key}
-                    style={[
-                      styles.chipButton,
-                      mode === m.key ? styles.chipButtonActive : [styles.chipButtonInactive, { backgroundColor: themeColors.card, borderColor: themeColors.border }],
-                    ]}
-                    onPress={() => setMode(m.key)}
-                  >
-                    <Text
-                      style={[
-                        styles.chipText,
-                        mode === m.key ? styles.chipTextActive : [styles.chipTextInactive, { color: isDark ? "#818CF8" : "#6C3EF4" }],
-                      ]}
-                    >
-                      {m.label}
-                    </Text>
-                  </TouchableOpacity>
-                ))}
-              </ScrollView>
-
-              {/* Editor Card */}
-              <View style={[styles.editorCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
-                {input.trim() !== "" && (
-                  <TouchableOpacity
-                    style={[styles.absoluteClearBtn, isDark && { backgroundColor: "#3F1B1B", borderColor: "#7F1D1D" }]}
-                    onPress={handleClear}
-                    activeOpacity={0.6}
-                  >
-                    <Ionicons name="trash-outline" size={18} color="#EF4444" />
-                  </TouchableOpacity>
-                )}
-
-                <TextInput
-                  placeholder={t("paste_or_type")}
-                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-                  multiline
-                  value={input}
-                  onChangeText={(val) => {
-                    setInput(val);
-                    setError(null);
-                  }}
-                  style={[styles.textInput, { color: themeColors.inputText }]}
-                  editable={!loading}
-                />
-
-                {/* Progress Indicators & Word Diagnostics */}
-                <View style={styles.progressSection}>
-                  <View style={styles.progressBarBg}>
-                    <View
-                      style={[
-                        styles.progressBarFill,
-                        {
-                          width: `${getProgressPercentage()}%`,
-                          backgroundColor: getProgressBarColor(),
-                        },
-                      ]}
-                    />
-                  </View>
-                  <View style={styles.counterRow}>
-                    <Text style={[styles.charCountText, { color: themeColors.subText }]}>{charCount} {t("characters")}</Text>
-                    <Text
-                      style={[
-                        styles.wordCountText,
-                        { color: themeColors.subText },
-                        isOverLimit && styles.wordCountErrorText,
-                      ]}
-                    >
-                      {wordCount} / 200 {t("words")}
-                    </Text>
-                  </View>
+          <View style={styles.contentWrapper}>
+            {/* TAB 1: PARAPHRASE ENGINE */}
+            {activeTab === "paraphrase" && (
+              <View>
+                {/* Screen Header */}
+                <View style={styles.screenHeader}>
+                  <Text style={[styles.headerTitle, { color: themeColors.text }]}>{t("ai_paraphraser")}</Text>
+                  <Text style={[styles.headerSubtitle, { color: themeColors.subText }]}>
+                    {t("rewrite_text_subtitle")}
+                  </Text>
                 </View>
 
-                {/* Word limit warning Banner */}
-                {isOverLimit && (
-                  <View style={styles.limitWarning}>
-                    <Ionicons name="warning-outline" size={16} color="#EF4444" />
-                    <Text style={styles.limitWarningText}>
-                      {t("max_words_warning")}
-                    </Text>
-                  </View>
-                )}
-
-                <View style={[styles.actionPanel, { borderTopColor: themeColors.border }]}>
-                  <View style={styles.leftActions}>
+                {/* Mode Scrollable Chips */}
+                <ScrollView
+                  horizontal
+                  showsHorizontalScrollIndicator={false}
+                  style={styles.chipsBar}
+                  contentContainerStyle={styles.chipsContent}
+                >
+                  {modes.map((m) => (
                     <TouchableOpacity
-                      style={[styles.actionIconButton, { backgroundColor: isDark ? "#24242B" : "#F3F1FF" }]}
-                      onPress={handlePaste}
-                      activeOpacity={0.6}
+                      key={m.key}
+                      style={[
+                        styles.chipButton,
+                        mode === m.key ? styles.chipButtonActive : [styles.chipButtonInactive, { backgroundColor: themeColors.card, borderColor: themeColors.border }],
+                      ]}
+                      onPress={() => setMode(m.key)}
                     >
-                      <Ionicons name="clipboard-outline" size={20} color={isDark ? "#818CF8" : "#6C3EF4"} />
-                      <Text style={[styles.actionIconLabel, { color: isDark ? "#818CF8" : "#6C3EF4" }]}>{t("paste")}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={[styles.actionIconButton, { backgroundColor: isDark ? "#24242B" : "#F3F1FF" }]}
-                      onPress={copyInputText}
-                      activeOpacity={0.6}
-                    >
-                      <Ionicons
-                        name={copiedInput ? "checkmark-done-outline" : "copy-outline"}
-                        size={20}
-                        color={copiedInput ? "#22C55E" : (isDark ? "#818CF8" : "#6C3EF4")}
-                      />
-                      <Text style={[styles.actionIconLabel, { color: isDark ? "#818CF8" : "#6C3EF4" }, copiedInput && { color: "#22C55E" }]}>
-                        {copiedInput ? t("copied") : t("copy_input")}
+                      <Text
+                        style={[
+                          styles.chipText,
+                          mode === m.key ? styles.chipTextActive : [styles.chipTextInactive, { color: isDark ? "#818CF8" : "#6C3EF4" }],
+                        ]}
+                      >
+                        {m.label}
                       </Text>
                     </TouchableOpacity>
-                  </View>
+                  ))}
+                </ScrollView>
 
-                  <View style={styles.rightActions}>
-                    <TouchableOpacity
-                      style={[
-                        styles.paraphraseBtn,
-                        (loading || isOverLimit || input.trim() === "") && styles.paraphraseBtnDisabled,
-                      ]}
-                      onPress={handleParaphrase}
-                      disabled={loading || isOverLimit || input.trim() === ""}
-                      activeOpacity={0.7}
-                    >
-                      {loading ? (
-                        <ActivityIndicator color="#fff" size="small" />
-                      ) : (
-                        <>
-                          <Ionicons name="sparkles-outline" size={18} color="#fff" />
-                          <Text style={styles.paraphraseBtnText}>{t("paraphrase_btn")}</Text>
-                        </>
+                {/* Responsive Editors Grid Container */}
+                <View style={Platform.OS === "web" && output !== "" ? styles.webEditorsContainer : undefined}>
+                  <View style={Platform.OS === "web" ? (output !== "" ? styles.webEditorHalf : styles.webEditorCentered) : undefined}>
+                    {/* Editor Card */}
+                    <View style={[styles.editorCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+                      {input.trim() !== "" && (
+                        <TouchableOpacity
+                          style={[styles.absoluteClearBtn, isDark && { backgroundColor: "#3F1B1B", borderColor: "#7F1D1D" }]}
+                          onPress={handleClear}
+                          activeOpacity={0.6}
+                        >
+                          <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                        </TouchableOpacity>
                       )}
-                    </TouchableOpacity>
+
+                      <TextInput
+                        placeholder={t("paste_or_type")}
+                        placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                        multiline
+                        value={input}
+                        onChangeText={(val) => {
+                          setInput(val);
+                          setError(null);
+                        }}
+                        style={[styles.textInput, { color: themeColors.inputText }]}
+                        editable={!loading}
+                      />
+
+                      {/* Progress Indicators & Word Diagnostics */}
+                      <View style={styles.progressSection}>
+                        <View style={styles.progressBarBg}>
+                          <View
+                            style={[
+                              styles.progressBarFill,
+                              {
+                                width: `${getProgressPercentage()}%`,
+                                backgroundColor: getProgressBarColor(),
+                              },
+                            ]}
+                          />
+                        </View>
+                        <View style={styles.counterRow}>
+                          <Text style={[styles.charCountText, { color: themeColors.subText }]}>{charCount} {t("characters")}</Text>
+                          <Text
+                            style={[
+                              styles.wordCountText,
+                              { color: themeColors.subText },
+                              isOverLimit && styles.wordCountErrorText,
+                            ]}
+                          >
+                            {wordCount} / 200 {t("words")}
+                          </Text>
+                        </View>
+                      </View>
+
+                      {/* Word limit warning Banner */}
+                      {isOverLimit && (
+                        <View style={styles.limitWarning}>
+                          <Ionicons name="warning-outline" size={16} color="#EF4444" />
+                          <Text style={styles.limitWarningText}>
+                            {t("max_words_warning")}
+                          </Text>
+                        </View>
+                      )}
+
+                      <View style={[styles.actionPanel, { borderTopColor: themeColors.border }]}>
+                        <View style={styles.leftActions}>
+                          <TouchableOpacity
+                            style={[styles.actionIconButton, { backgroundColor: isDark ? "#24242B" : "#F3F1FF" }]}
+                            onPress={handlePaste}
+                            activeOpacity={0.6}
+                          >
+                            <Ionicons name="clipboard-outline" size={20} color={isDark ? "#818CF8" : "#6C3EF4"} />
+                            <Text style={[styles.actionIconLabel, { color: isDark ? "#818CF8" : "#6C3EF4" }]}>{t("paste")}</Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            style={[styles.actionIconButton, { backgroundColor: isDark ? "#24242B" : "#F3F1FF" }]}
+                            onPress={copyInputText}
+                            activeOpacity={0.6}
+                          >
+                            <Ionicons
+                              name={copiedInput ? "checkmark-done-outline" : "copy-outline"}
+                              size={20}
+                              color={copiedInput ? "#22C55E" : (isDark ? "#818CF8" : "#6C3EF4")}
+                            />
+                            <Text style={[styles.actionIconLabel, { color: isDark ? "#818CF8" : "#6C3EF4" }, copiedInput && { color: "#22C55E" }]}>
+                              {copiedInput ? t("copied") : t("copy_input")}
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
+
+                        <View style={styles.rightActions}>
+                          <TouchableOpacity
+                            style={[
+                              styles.paraphraseBtn,
+                              (loading || isOverLimit || input.trim() === "") && styles.paraphraseBtnDisabled,
+                            ]}
+                            onPress={handleParaphrase}
+                            disabled={loading || isOverLimit || input.trim() === ""}
+                            activeOpacity={0.7}
+                          >
+                            {loading ? (
+                              <ActivityIndicator color="#fff" size="small" />
+                            ) : (
+                              <>
+                                <Ionicons name="sparkles-outline" size={18} color="#fff" />
+                                <Text style={styles.paraphraseBtnText}>{t("paraphrase_btn")}</Text>
+                              </>
+                            )}
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
                   </View>
+
+                  {/* Endpoint Error Handling Display */}
+                  {error && (
+                    <View style={styles.apiErrorBox}>
+                      <Ionicons name="alert-circle-outline" size={20} color="#EF4444" />
+                      <Text style={styles.apiErrorText}>{error}</Text>
+                    </View>
+                  )}
+
+                  {/* TAB 1 OUTPUT CARD */}
+                  {output !== "" && (
+                    <View style={Platform.OS === "web" ? styles.webEditorHalf : undefined}>
+                      <View style={[styles.outputCard, { backgroundColor: themeColors.card, borderColor: themeColors.border, marginTop: Platform.OS === "web" ? 0 : 20 }]}>
+                        <View style={styles.outputHeader}>
+                          <Text style={[styles.outputTitle, { color: themeColors.text }]}>{t("output_title")}</Text>
+                        </View>
+
+                        <Text style={[styles.outputText, { color: themeColors.text }]}>{output}</Text>
+
+                        {/* Output Action Panel */}
+                        <View style={[styles.outputActionRow, { borderTopColor: themeColors.border }]}>
+                          <TouchableOpacity
+                            style={[styles.outputActionButton, { backgroundColor: isDark ? "#24242B" : "#F9FAFB", borderColor: themeColors.border }]}
+                            onPress={copyOutputText}
+                          >
+                            <Ionicons
+                              name={copiedOutput ? "checkmark-done" : "copy-outline"}
+                              size={16}
+                              color={copiedOutput ? "#22C55E" : (isDark ? "#818CF8" : "#6C3EF4")}
+                            />
+                            <Text style={[styles.outputActionLabel, { color: isDark ? "#818CF8" : "#6C3EF4" }, copiedOutput && { color: "#22C55E" }]}>
+                              {copiedOutput ? t("copied") : t("copy_output")}
+                            </Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            style={[styles.outputActionButton, { backgroundColor: isDark ? "#24242B" : "#F9FAFB", borderColor: themeColors.border }]}
+                            onPress={handleParaphrase}
+                          >
+                            <Ionicons name="refresh-outline" size={16} color={isDark ? "#818CF8" : "#6C3EF4"} />
+                            <Text style={[styles.outputActionLabel, { color: isDark ? "#818CF8" : "#6C3EF4" }]}>{t("regenerate")}</Text>
+                          </TouchableOpacity>
+
+                          <TouchableOpacity
+                            style={[styles.outputActionButton, { backgroundColor: isDark ? "#24242B" : "#F9FAFB", borderColor: themeColors.border }]}
+                            onPress={handleSwap}
+                          >
+                            <Ionicons name="swap-vertical-outline" size={16} color={isDark ? "#818CF8" : "#6C3EF4"} />
+                            <Text style={[styles.outputActionLabel, { color: isDark ? "#818CF8" : "#6C3EF4" }]}>{t("swap_text")}</Text>
+                          </TouchableOpacity>
+                        </View>
+                      </View>
+                    </View>
+                  )}
                 </View>
               </View>
-
-              {/* Endpoint Error Handling Display */}
-              {error && (
-                <View style={styles.apiErrorBox}>
-                  <Ionicons name="alert-circle-outline" size={20} color="#EF4444" />
-                  <Text style={styles.apiErrorText}>{error}</Text>
-                </View>
-              )}
-
-              {/* TAB 1 OUTPUT CARD */}
-              {output !== "" && (
-                <View style={[styles.outputCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
-                  <View style={styles.outputHeader}>
-                    <Text style={[styles.outputTitle, { color: themeColors.text }]}>{t("output_title")}</Text>
-                  </View>
-
-                  <Text style={[styles.outputText, { color: themeColors.text }]}>{output}</Text>
-
-                  {/* Output Action Panel */}
-                  <View style={[styles.outputActionRow, { borderTopColor: themeColors.border }]}>
-                    <TouchableOpacity
-                      style={[styles.outputActionButton, { backgroundColor: isDark ? "#24242B" : "#F9FAFB", borderColor: themeColors.border }]}
-                      onPress={copyOutputText}
-                    >
-                      <Ionicons
-                        name={copiedOutput ? "checkmark-done" : "copy-outline"}
-                        size={16}
-                        color={copiedOutput ? "#22C55E" : (isDark ? "#818CF8" : "#6C3EF4")}
-                      />
-                      <Text style={[styles.outputActionLabel, { color: isDark ? "#818CF8" : "#6C3EF4" }, copiedOutput && { color: "#22C55E" }]}>
-                        {copiedOutput ? t("copied") : t("copy_output")}
-                      </Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={[styles.outputActionButton, { backgroundColor: isDark ? "#24242B" : "#F9FAFB", borderColor: themeColors.border }]}
-                      onPress={handleParaphrase}
-                    >
-                      <Ionicons name="refresh-outline" size={16} color={isDark ? "#818CF8" : "#6C3EF4"} />
-                      <Text style={[styles.outputActionLabel, { color: isDark ? "#818CF8" : "#6C3EF4" }]}>{t("regenerate")}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                      style={[styles.outputActionButton, { backgroundColor: isDark ? "#24242B" : "#F9FAFB", borderColor: themeColors.border }]}
-                      onPress={handleSwap}
-                    >
-                      <Ionicons name="swap-vertical-outline" size={16} color={isDark ? "#818CF8" : "#6C3EF4"} />
-                      <Text style={[styles.outputActionLabel, { color: isDark ? "#818CF8" : "#6C3EF4" }]}>{t("swap_text")}</Text>
-                    </TouchableOpacity>
-                  </View>
-                </View>
-              )}
-            </View>
-          )}
+            )}
 
           {/* TAB 2: HISTORICAL LOGS CARD */}
           {activeTab === "history" && (
@@ -967,6 +975,7 @@ export default function ParaphraseScreen() {
               ) : null}
             </View>
           )}
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
 
@@ -1148,8 +1157,9 @@ const styles = StyleSheet.create({
   topTabBar: {
     flexDirection: "row",
     backgroundColor: "#fff",
-    paddingTop: 50,
+    paddingTop: Platform.OS === "web" ? 12 : 54,
     paddingBottom: 8,
+    paddingHorizontal: 6,
     borderBottomWidth: 1,
     borderBottomColor: "#EAE6FF",
     shadowColor: "#6C3EF4",
@@ -1163,8 +1173,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    paddingVertical: 12,
-    marginHorizontal: 8,
+    paddingVertical: 10,
+    marginHorizontal: 4,
     borderRadius: 20,
     backgroundColor: "transparent",
   },
@@ -1187,6 +1197,22 @@ const styles = StyleSheet.create({
     paddingHorizontal: 18,
     paddingTop: 16,
     paddingBottom: 40,
+  },
+  contentWrapper: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 1000 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
+  },
+  webEditorsContainer: {
+    flexDirection: "row" as const,
+    gap: 16,
+    alignItems: "flex-start" as const,
+  },
+  webEditorHalf: {
+    flex: 1,
+  },
+  webEditorCentered: {
+    width: "100%",
   },
   screenHeader: {
     marginBottom: 16,

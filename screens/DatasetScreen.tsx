@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   Linking,
   Alert,
+  Platform,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -46,7 +47,7 @@ export default function DatasetScreen() {
   const handleBack = useCallback(() => {
     try {
       console.log("[DatasetScreen] Back pressed");
-      if (navigation) {
+      if (navigation && navigation.canGoBack()) {
         navigation.goBack();
       }
     } catch (err) {
@@ -109,189 +110,185 @@ export default function DatasetScreen() {
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.header}>
-          <TouchableOpacity
-            style={[styles.backButton, { backgroundColor: themeColors.card }]}
-            onPress={handleBack}
-          >
-            <Ionicons
-              name="arrow-back"
-              size={24}
-              color={themeColors.text}
-            />
-          </TouchableOpacity>
-
-          <TouchableOpacity>
-            <Ionicons
-              name="options-outline"
-              size={24}
-              color={themeColors.text}
-            />
-          </TouchableOpacity>
-        </View>
-
-        <Text style={[styles.title, { color: themeColors.text }]}>
-          {t("discover_datasets")}
-        </Text>
-
-        <Text style={[styles.subtitle, { color: themeColors.subText }]}>
-          {t("find_datasets_subtitle")}
-        </Text>
-
-        <View style={[styles.searchContainer, { backgroundColor: themeColors.card }]}>
-          <Ionicons
-            name="search-outline"
-            size={22}
-            color={isDark ? "#6B7280" : "#9CA3AF"}
-          />
-
-          <TextInput
-            placeholder={t("search_dataset_placeholder")}
-            placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-            value={search}
-            onChangeText={setSearch}
-            style={[styles.searchInput, { color: themeColors.text }]}
-          />
-        </View>
-
-        {/* Tab Selector Buttons */}
-        <View style={styles.providerTabContainer}>
-          <TouchableOpacity
-            style={[
-              styles.providerTabButton,
-              { backgroundColor: themeColors.card, borderColor: themeColors.border },
-              selectedProvider === "all" && { backgroundColor: themeColors.primary, borderColor: themeColors.primary }
-            ]}
-            onPress={() => setSelectedProvider("all")}
-            activeOpacity={0.7}
-          >
-            <Text style={[
-              styles.providerTabText,
-              { color: themeColors.subText },
-              selectedProvider === "all" && { color: "#FFFFFF" }
-            ]}>
-              All
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.providerTabButton,
-              { backgroundColor: themeColors.card, borderColor: themeColors.border },
-              selectedProvider === "kaggle" && { backgroundColor: themeColors.primary, borderColor: themeColors.primary }
-            ]}
-            onPress={() => setSelectedProvider("kaggle")}
-            activeOpacity={0.7}
-          >
-            <Text style={[
-              styles.providerTabText,
-              { color: themeColors.subText },
-              selectedProvider === "kaggle" && { color: "#FFFFFF" }
-            ]}>
-              Kaggle
-            </Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[
-              styles.providerTabButton,
-              { backgroundColor: themeColors.card, borderColor: themeColors.border },
-              selectedProvider === "uci" && { backgroundColor: themeColors.primary, borderColor: themeColors.primary }
-            ]}
-            onPress={() => setSelectedProvider("uci")}
-            activeOpacity={0.7}
-          >
-            <Text style={[
-              styles.providerTabText,
-              { color: themeColors.subText },
-              selectedProvider === "uci" && { color: "#FFFFFF" }
-            ]}>
-              UCI
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        {loading ? (
-          <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color="#6C3EF4" />
-            <Text style={[styles.loadingText, { color: themeColors.subText }]}>{t("fetching_datasets")}</Text>
-          </View>
-        ) : error ? (
-          <View style={[styles.errorCard, { backgroundColor: isDark ? "#2D1D1D" : "#FFF5F5", borderColor: isDark ? "#4A1E1E" : "#FEE2E2" }]}>
-            <Ionicons name="alert-circle-outline" size={40} color="#EF4444" />
-            <Text style={[styles.errorTitle, { color: isDark ? "#F87171" : "#991B1B" }]}>{t("search_failed")}</Text>
-            <Text style={[styles.errorText, { color: isDark ? "#FCA5A5" : "#B91C1C" }]}>{error}</Text>
-            <TouchableOpacity style={styles.retryButton} onPress={() => fetchDatasets(search, selectedProvider)}>
-              <Text style={styles.retryButtonText}>{t("retry_search")}</Text>
-            </TouchableOpacity>
-          </View>
-        ) : datasets.length === 0 ? (
-          <View style={[styles.emptyCard, { backgroundColor: themeColors.card }]}>
-            <Ionicons name="search-outline" size={40} color={isDark ? "#4B5563" : "#9CA3AF"} />
-            <Text style={[styles.emptyTitle, { color: themeColors.text }]}>{t("no_datasets_found")}</Text>
-            <Text style={[styles.emptySubtitle, { color: themeColors.subText }]}>
-              {t("try_another_topic")}
-            </Text>
-          </View>
-        ) : (
-          Array.isArray(datasets) && datasets.map((item, index) => (
-            <View
-              key={index}
-              style={[styles.card, { backgroundColor: themeColors.card }]}
-            >
-              <View style={styles.cardHeader}>
-                <Text style={[styles.datasetTitle, { color: themeColors.text }]}>
-                  {item.title}
-                </Text>
-                
-                <View
-                  style={[
-                    styles.badge,
-                    {
-                      backgroundColor: getSourceBadgeStyles(item.source).bg,
-                    },
-                  ]}
-                >
-                  <Text style={[
-                    styles.badgeText,
-                    {
-                      color: getSourceBadgeStyles(item.source).text,
-                    }
-                  ]}>
-                    {item.source}
-                  </Text>
-                </View>
-              </View>
-
-              {item.description ? (
-                <Text style={[styles.datasetDescription, { color: themeColors.subText }]} numberOfLines={3}>
-                  {item.description}
-                </Text>
-              ) : null}
-
-              <TouchableOpacity 
-                style={styles.openDatasetLink}
-                onPress={() => {
-                  if (item.url) {
-                    Linking.openURL(item.url).catch(err => {
-                      console.error("Could not open dataset URL:", err);
-                    });
-                  }
-                }}
+        <View style={styles.contentWrapper}>
+          {navigation.canGoBack() && (
+            <View style={styles.header}>
+              <TouchableOpacity
+                style={[styles.backButton, { backgroundColor: themeColors.card }]}
+                onPress={handleBack}
               >
-                <Text style={[styles.openDatasetLinkText, { color: isDark ? "#818CF8" : "#2563EB" }]}>
-                  Open Dataset
-                </Text>
                 <Ionicons
-                  name="open-outline"
-                  size={16}
-                  color={isDark ? "#818CF8" : "#2563EB"}
-                  style={{ marginLeft: 6 }}
+                  name="arrow-back"
+                  size={24}
+                  color={themeColors.text}
                 />
               </TouchableOpacity>
             </View>
-          ))
-        )}
+          )}
+
+          <Text style={[styles.title, { color: themeColors.text }]}>
+            {t("discover_datasets")}
+          </Text>
+
+          <Text style={[styles.subtitle, { color: themeColors.subText }]}>
+            {t("find_datasets_subtitle")}
+          </Text>
+
+          <View style={[styles.searchContainer, { backgroundColor: themeColors.card }]}>
+            <Ionicons
+              name="search-outline"
+              size={22}
+              color={isDark ? "#6B7280" : "#9CA3AF"}
+            />
+
+            <TextInput
+              placeholder={t("search_dataset_placeholder")}
+              placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+              value={search}
+              onChangeText={setSearch}
+              style={[styles.searchInput, { color: themeColors.text }]}
+            />
+          </View>
+
+          {/* Tab Selector Buttons */}
+          <View style={styles.providerTabContainer}>
+            <TouchableOpacity
+              style={[
+                styles.providerTabButton,
+                { backgroundColor: themeColors.card, borderColor: themeColors.border },
+                selectedProvider === "all" && { backgroundColor: themeColors.primary, borderColor: themeColors.primary }
+              ]}
+              onPress={() => setSelectedProvider("all")}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.providerTabText,
+                { color: themeColors.subText },
+                selectedProvider === "all" && { color: "#FFFFFF" }
+              ]}>
+                All
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.providerTabButton,
+                { backgroundColor: themeColors.card, borderColor: themeColors.border },
+                selectedProvider === "kaggle" && { backgroundColor: themeColors.primary, borderColor: themeColors.primary }
+              ]}
+              onPress={() => setSelectedProvider("kaggle")}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.providerTabText,
+                { color: themeColors.subText },
+                selectedProvider === "kaggle" && { color: "#FFFFFF" }
+              ]}>
+                Kaggle
+              </Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity
+              style={[
+                styles.providerTabButton,
+                { backgroundColor: themeColors.card, borderColor: themeColors.border },
+                selectedProvider === "uci" && { backgroundColor: themeColors.primary, borderColor: themeColors.primary }
+              ]}
+              onPress={() => setSelectedProvider("uci")}
+              activeOpacity={0.7}
+            >
+              <Text style={[
+                styles.providerTabText,
+                { color: themeColors.subText },
+                selectedProvider === "uci" && { color: "#FFFFFF" }
+              ]}>
+                UCI
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {loading ? (
+            <View style={styles.centerContainer}>
+              <ActivityIndicator size="large" color="#6C3EF4" />
+              <Text style={[styles.loadingText, { color: themeColors.subText }]}>{t("fetching_datasets")}</Text>
+            </View>
+          ) : error ? (
+            <View style={[styles.errorCard, { backgroundColor: isDark ? "#2D1D1D" : "#FFF5F5", borderColor: isDark ? "#4A1E1E" : "#FEE2E2" }]}>
+              <Ionicons name="alert-circle-outline" size={40} color="#EF4444" />
+              <Text style={[styles.errorTitle, { color: isDark ? "#F87171" : "#991B1B" }]}>{t("search_failed")}</Text>
+              <Text style={[styles.errorText, { color: isDark ? "#FCA5A5" : "#B91C1C" }]}>{error}</Text>
+              <TouchableOpacity style={styles.retryButton} onPress={() => fetchDatasets(search, selectedProvider)}>
+                <Text style={styles.retryButtonText}>{t("retry_search")}</Text>
+              </TouchableOpacity>
+            </View>
+          ) : datasets.length === 0 ? (
+            <View style={[styles.emptyCard, { backgroundColor: themeColors.card }]}>
+              <Ionicons name="search-outline" size={40} color={isDark ? "#4B5563" : "#9CA3AF"} />
+              <Text style={[styles.emptyTitle, { color: themeColors.text }]}>{t("no_datasets_found")}</Text>
+              <Text style={[styles.emptySubtitle, { color: themeColors.subText }]}>
+                {t("try_another_topic")}
+              </Text>
+            </View>
+          ) : (
+            Array.isArray(datasets) && datasets.map((item, index) => (
+              <View
+                key={index}
+                style={[styles.card, { backgroundColor: themeColors.card }]}
+              >
+                <View style={styles.cardHeader}>
+                  <Text style={[styles.datasetTitle, { color: themeColors.text }]}>
+                    {item.title}
+                  </Text>
+                  
+                  <View
+                    style={[
+                      styles.badge,
+                      {
+                        backgroundColor: getSourceBadgeStyles(item.source).bg,
+                      },
+                    ]}
+                  >
+                    <Text style={[
+                      styles.badgeText,
+                      {
+                        color: getSourceBadgeStyles(item.source).text,
+                      }
+                    ]}>
+                      {item.source}
+                    </Text>
+                  </View>
+                </View>
+
+                {item.description ? (
+                  <Text style={[styles.datasetDescription, { color: themeColors.subText }]} numberOfLines={3}>
+                    {item.description}
+                  </Text>
+                ) : null}
+
+                <TouchableOpacity 
+                  style={styles.openDatasetLink}
+                  onPress={() => {
+                    if (item.url) {
+                      Linking.openURL(item.url).catch(err => {
+                        console.error("Could not open dataset URL:", err);
+                      });
+                    }
+                  }}
+                >
+                  <Text style={[styles.openDatasetLinkText, { color: isDark ? "#818CF8" : "#2563EB" }]}>
+                    Open Dataset
+                  </Text>
+                  <Ionicons
+                    name="open-outline"
+                    size={16}
+                    color={isDark ? "#818CF8" : "#2563EB"}
+                    style={{ marginLeft: 6 }}
+                  />
+                </TouchableOpacity>
+              </View>
+            ))
+          )}
+        </View>
       </ScrollView>
     </View>
   );
@@ -302,12 +299,18 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F3F1FF",
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: Platform.OS === "web" ? 20 : 60,
+  },
+
+  contentWrapper: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 960 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" : undefined,
+    paddingBottom: 40,
   },
 
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 24,
   },

@@ -129,7 +129,8 @@ export default function LanguageSettingsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingTop: Platform.OS === "web" ? 20 : Platform.OS === "ios" ? 60 : 40,
+    alignItems: Platform.OS === "web" ? "center" as const : undefined,
   },
   header: {
     flexDirection: "row",
@@ -137,6 +138,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 10,
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 680 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
   },
   backButton: {
     width: 48,
@@ -158,6 +162,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 40,
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 680 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
   },
   subtitle: {
     fontSize: 15,
@@ -221,9 +228,12 @@ const styles = StyleSheet.create({
     marginHorizontal: 20,
     paddingVertical: 16,
     borderRadius: 16,
-    marginBottom: Platform.OS === "ios" ? 40 : 24,
+    marginBottom: Platform.OS === "web" ? 24 : Platform.OS === "ios" ? 40 : 24,
     justifyContent: "center",
     alignItems: "center",
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 680 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
     shadowColor: "#6C3EF4",
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.2,

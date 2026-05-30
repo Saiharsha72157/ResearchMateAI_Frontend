@@ -369,7 +369,7 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F3F1FF",
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: Platform.OS === "web" ? 20 : 60,
   },
   header: {
     flexDirection: "row",

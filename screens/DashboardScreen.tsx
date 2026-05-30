@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  Platform,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
@@ -103,102 +104,104 @@ export default function DashboardScreen() {
 
       <ScrollView showsVerticalScrollIndicator={false}>
 
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <Text style={[styles.welcome, { color: themeColors.subText }]}>
-              {t("welcome_back")}
-            </Text>
-            <Text style={[styles.name, { color: themeColors.text }]}>
-              {user?.fullName || user?.username || "Researcher"}
-            </Text>
-          </View>
-          
-          <TouchableOpacity
-            style={[styles.avatarCircle, { backgroundColor: themeColors.primary }]}
-            onPress={() => navigation.navigate("Profile")}
-            activeOpacity={0.8}
-          >
-            <Text style={styles.avatarCircleText}>
-              {getInitials()}
-            </Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.banner}>
-
-          <View style={styles.bannerContent}>
-
-            <Text style={styles.bannerTitle}>
-              {t("ai_research_assistant")}
-            </Text>
-
-            <Text style={styles.bannerSubtitle}>
-              {t("smart_tools_desc")}
-            </Text>
-
-          </View>
-
-          <Ionicons
-            name="sparkles-outline"
-            size={60}
-            color="#fff"
-          />
-
-        </View>
-
-        <Text style={[styles.sectionTitle, { color: themeColors.title }]}>
-          {t("quick_access")}
-        </Text>
-
-        <View style={styles.grid}>
-
-          {features.map((item, index) => (
-
+        <View style={styles.contentWrapper}>
+          <View style={styles.header}>
+            <View style={styles.headerLeft}>
+              <Text style={[styles.welcome, { color: themeColors.subText }]}>
+                {t("welcome_back")}
+              </Text>
+              <Text style={[styles.name, { color: themeColors.text }]}>
+                {user?.fullName || user?.username || "Researcher"}
+              </Text>
+            </View>
+            
             <TouchableOpacity
-              key={index}
-              style={[styles.card, { backgroundColor: themeColors.card }]}
-              onPress={() => {
-
-                if (item.type === "tab") {
-
-                  handleNavigate("MainApp", true, item.screen);
-
-                } else {
-
-                  handleNavigate(item.screen);
-
-                }
-
-              }}
+              style={[styles.avatarCircle, { backgroundColor: themeColors.primary }]}
+              onPress={() => navigation.navigate("Profile")}
+              activeOpacity={0.8}
             >
+              <Text style={styles.avatarCircleText}>
+                {getInitials()}
+              </Text>
+            </TouchableOpacity>
+          </View>
 
-              <View
-                style={[
-                  styles.iconCircle,
-                  { backgroundColor: item.color },
-                ]}
+          <View style={styles.banner}>
+
+            <View style={styles.bannerContent}>
+
+              <Text style={styles.bannerTitle}>
+                {t("ai_research_assistant")}
+              </Text>
+
+              <Text style={styles.bannerSubtitle}>
+                {t("smart_tools_desc")}
+              </Text>
+
+            </View>
+
+            <Ionicons
+              name="sparkles-outline"
+              size={60}
+              color="#fff"
+            />
+
+          </View>
+
+          <Text style={[styles.sectionTitle, { color: themeColors.title }]}>
+            {t("quick_access")}
+          </Text>
+
+          <View style={styles.grid}>
+
+            {features.map((item, index) => (
+
+              <TouchableOpacity
+                key={index}
+                style={[styles.card, { backgroundColor: themeColors.card }]}
+                onPress={() => {
+
+                  if (item.type === "tab") {
+
+                    handleNavigate("MainApp", true, item.screen);
+
+                  } else {
+
+                    handleNavigate(item.screen);
+
+                  }
+
+                }}
               >
 
-                <Ionicons
-                  name={item.icon as any}
-                  size={28}
-                  color="#fff"
-                />
+                <View
+                  style={[
+                    styles.iconCircle,
+                    { backgroundColor: item.color },
+                  ]}
+                >
 
-              </View>
+                  <Ionicons
+                    name={item.icon as any}
+                    size={28}
+                    color="#fff"
+                  />
 
-              <Text style={[styles.cardTitle, { color: themeColors.text }]}>
-                {item.title}
-              </Text>
+                </View>
 
-              <Text style={[styles.cardSubtitle, { color: themeColors.subText }]}>
-                {item.subtitle}
-              </Text>
+                <Text style={[styles.cardTitle, { color: themeColors.text }]}>
+                  {item.title}
+                </Text>
 
-            </TouchableOpacity>
+                <Text style={[styles.cardSubtitle, { color: themeColors.subText }]}>
+                  {item.subtitle}
+                </Text>
 
-          ))}
+              </TouchableOpacity>
 
+            ))}
+
+          </View>
         </View>
 
       </ScrollView>
@@ -214,7 +217,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F3F1FF",
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: Platform.OS === "web" ? 20 : 60,
+  },
+
+  contentWrapper: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 1100 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" : undefined,
+    paddingBottom: 40,
   },
 
   header: {
@@ -302,10 +312,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+    gap: Platform.OS === "web" ? 16 : undefined,
   },
 
   card: {
-    width: "47%",
+    width: Platform.OS === "web" ? "23%" : "47%",
+    minWidth: Platform.OS === "web" ? 180 : undefined,
+    maxWidth: Platform.OS === "web" ? 280 : undefined,
     backgroundColor: "#fff",
     borderRadius: 26,
     padding: 22,

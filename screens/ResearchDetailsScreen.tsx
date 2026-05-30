@@ -182,7 +182,7 @@ export default function ResearchDetailsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingTop: Platform.OS === "web" ? 20 : Platform.OS === "ios" ? 60 : 40,
   },
   header: {
     flexDirection: "row",
@@ -190,6 +190,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 20,
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 960 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
   },
   backButton: {
     width: 44,
@@ -217,6 +220,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 960 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
   },
   mainCard: {
     borderRadius: 24,

@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  Platform,
 } from "react-native";
 
 import { useTranslation } from "../services/localization";
@@ -49,76 +50,78 @@ export default function OnboardingTwo() {
 
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
 
-      <View style={styles.topRow}>
+      <View style={styles.formCard}>
+        <View style={styles.topRow}>
 
-        <View style={styles.dotsContainer}>
-          <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
-          <View style={[styles.dot, styles.activeDot, { backgroundColor: themeColors.primary }]} />
-          <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
+          <View style={styles.dotsContainer}>
+            <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
+            <View style={[styles.dot, styles.activeDot, { backgroundColor: themeColors.primary }]} />
+            <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
+          </View>
+
+          <TouchableOpacity
+            onPress={handleSkip}
+          >
+            <Text style={[styles.skip, { color: themeColors.subText }]}>
+              {t("skip")}
+            </Text>
+          </TouchableOpacity>
+
+        </View>
+
+        <View style={styles.centerSection}>
+
+          <View style={[styles.documentCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
+
+            <View style={[styles.line, { backgroundColor: isDark ? "#4B5563" : "#D1D5DB" }]} />
+            <View style={[styles.smallLine, { backgroundColor: isDark ? "#374151" : "#E5E7EB" }]} />
+            <View style={[styles.smallLine2, { backgroundColor: isDark ? "#374151" : "#E5E7EB" }]} />
+
+          </View>
+
+          <View style={[styles.searchCircle, { backgroundColor: themeColors.card }]}>
+
+            <Ionicons
+              name="search"
+              size={30}
+              color="#06B6D4"
+            />
+
+          </View>
+
+          <View style={[styles.tag, styles.kaggleTag]}>
+            <Text style={styles.tagText}>Kaggle</Text>
+          </View>
+
+          <View style={[styles.tag, styles.uciTag]}>
+            <Text style={styles.tagText}>UCI</Text>
+          </View>
+
+        </View>
+
+        <View style={styles.textSection}>
+
+          <Text style={[styles.title, { color: themeColors.text }]}>
+            {t("onboarding2_title")}
+          </Text>
+
+          <Text style={[styles.subtitle, { color: themeColors.subText }]}>
+            {t("onboarding2_sub")}
+          </Text>
+
         </View>
 
         <TouchableOpacity
-          onPress={handleSkip}
+          style={[styles.button, { backgroundColor: themeColors.primary }]}
+          onPress={handleNext}
         >
-          <Text style={[styles.skip, { color: themeColors.subText }]}>
-            {t("skip")}
+
+          <Text style={styles.buttonText}>
+            {t("next")}
           </Text>
+
         </TouchableOpacity>
-
       </View>
-
-      <View style={styles.centerSection}>
-
-        <View style={[styles.documentCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}>
-
-          <View style={[styles.line, { backgroundColor: isDark ? "#4B5563" : "#D1D5DB" }]} />
-          <View style={[styles.smallLine, { backgroundColor: isDark ? "#374151" : "#E5E7EB" }]} />
-          <View style={[styles.smallLine2, { backgroundColor: isDark ? "#374151" : "#E5E7EB" }]} />
-
-        </View>
-
-        <View style={[styles.searchCircle, { backgroundColor: themeColors.card }]}>
-
-          <Ionicons
-            name="search"
-            size={30}
-            color="#06B6D4"
-          />
-
-        </View>
-
-        <View style={[styles.tag, styles.kaggleTag]}>
-          <Text style={styles.tagText}>Kaggle</Text>
-        </View>
-
-        <View style={[styles.tag, styles.uciTag]}>
-          <Text style={styles.tagText}>UCI</Text>
-        </View>
-
-      </View>
-
-      <View style={styles.textSection}>
-
-        <Text style={[styles.title, { color: themeColors.text }]}>
-          {t("onboarding2_title")}
-        </Text>
-
-        <Text style={[styles.subtitle, { color: themeColors.subText }]}>
-          {t("onboarding2_sub")}
-        </Text>
-
-      </View>
-
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: themeColors.primary }]}
-        onPress={handleNext}
-      >
-
-        <Text style={styles.buttonText}>
-          {t("next")}
-        </Text>
-
-      </TouchableOpacity>
 
     </View>
 
@@ -131,8 +134,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: Platform.OS === "web" ? 20 : 60,
     paddingBottom: 40,
+    justifyContent: "space-between",
+    alignItems: Platform.OS === "web" ? "center" : undefined,
+  },
+
+  formCard: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 520 : undefined,
+    flex: 1,
     justifyContent: "space-between",
   },
 
@@ -225,13 +236,13 @@ const styles = StyleSheet.create({
 
   kaggleTag: {
     backgroundColor: "#6C3EF4",
-    left: 20,
-    bottom: 40,
+    left: Platform.OS === "web" ? 110 : 20,
+    bottom: Platform.OS === "web" ? 20 : 40,
   },
 
   uciTag: {
     backgroundColor: "#22C55E",
-    right: 20,
+    right: Platform.OS === "web" ? 110 : 20,
     top: 100,
   },
 

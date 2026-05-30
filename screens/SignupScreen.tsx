@@ -65,83 +65,85 @@ export default function SignupScreen() {
         contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <Text style={[styles.title, { color: themeColors.text }]}>Create Account</Text>
-          <Text style={[styles.subtitle, { color: themeColors.subText }]}>
-            Sign up to get started with ResearchMate AI
-          </Text>
-        </View>
-
-        <View style={styles.form}>
-          <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
-            <Ionicons name="mail-outline" size={20} color={themeColors.subText} style={styles.icon} />
-            <TextInput
-              placeholder="Email Address"
-              placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-              value={email}
-              onChangeText={setEmail}
-              keyboardType="email-address"
-              style={[styles.input, { color: themeColors.text }]}
-              autoCapitalize="none"
-            />
-          </View>
-
-          <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
-            <Ionicons name="call-outline" size={20} color={themeColors.subText} style={styles.icon} />
-            <TextInput
-              placeholder="Mobile Number"
-              placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-              value={mobile}
-              onChangeText={setMobile}
-              keyboardType="phone-pad"
-              maxLength={10}
-              style={[styles.input, { color: themeColors.text }]}
-            />
-          </View>
-
-          <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
-            <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
-            <TextInput
-              placeholder="Password"
-              placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-              value={password}
-              onChangeText={setPassword}
-              secureTextEntry
-              style={[styles.input, { color: themeColors.text }]}
-            />
-          </View>
-
-          <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
-            <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
-            <TextInput
-              placeholder="Confirm Password"
-              placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-              value={confirmPassword}
-              onChangeText={setConfirmPassword}
-              secureTextEntry
-              style={[styles.input, { color: themeColors.text }]}
-            />
-          </View>
-
-          <TouchableOpacity
-            style={[styles.button, loading && { opacity: 0.8 }]}
-            onPress={handleSignup}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color="#fff" />
-            ) : (
-              <Text style={styles.buttonText}>Sign Up</Text>
-            )}
-          </TouchableOpacity>
-
-          <View style={styles.footer}>
-            <Text style={[styles.footerText, { color: themeColors.subText }]}>
-              Already have an account?{" "}
+        <View style={styles.formCard}>
+          <View style={styles.header}>
+            <Text style={[styles.title, { color: themeColors.text }]}>Create Account</Text>
+            <Text style={[styles.subtitle, { color: themeColors.subText }]}>
+              Sign up to get started with ResearchMate AI
             </Text>
-            <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-              <Text style={styles.footerLink}>Login</Text>
+          </View>
+
+          <View style={styles.form}>
+            <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+              <Ionicons name="mail-outline" size={20} color={themeColors.subText} style={styles.icon} />
+              <TextInput
+                placeholder="Email Address"
+                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                value={email}
+                onChangeText={setEmail}
+                keyboardType="email-address"
+                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                autoCapitalize="none"
+              />
+            </View>
+
+            <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+              <Ionicons name="call-outline" size={20} color={themeColors.subText} style={styles.icon} />
+              <TextInput
+                placeholder="Mobile Number"
+                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                value={mobile}
+                onChangeText={setMobile}
+                keyboardType="phone-pad"
+                maxLength={10}
+                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+              />
+            </View>
+
+            <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+              <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
+              <TextInput
+                placeholder="Password"
+                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                value={password}
+                onChangeText={setPassword}
+                secureTextEntry
+                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+              />
+            </View>
+
+            <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+              <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
+              <TextInput
+                placeholder="Confirm Password"
+                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                value={confirmPassword}
+                onChangeText={setConfirmPassword}
+                secureTextEntry
+                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+              />
+            </View>
+
+            <TouchableOpacity
+              style={[styles.button, loading && { opacity: 0.8 }]}
+              onPress={handleSignup}
+              disabled={loading}
+            >
+              {loading ? (
+                <ActivityIndicator color="#fff" />
+              ) : (
+                <Text style={styles.buttonText}>Sign Up</Text>
+              )}
             </TouchableOpacity>
+
+            <View style={styles.footer}>
+              <Text style={[styles.footerText, { color: themeColors.subText }]}>
+                Already have an account?{" "}
+              </Text>
+              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                <Text style={styles.footerLink}>Login</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </ScrollView>
@@ -153,8 +155,15 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     paddingHorizontal: 24,
-    paddingTop: 80,
+    paddingTop: Platform.OS === "web" ? 0 : 80,
     paddingBottom: 40,
+    alignItems: Platform.OS === "web" ? "center" : undefined,
+    justifyContent: Platform.OS === "web" ? "center" : undefined,
+    minHeight: Platform.OS === "web" ? ("100vh" as any) : undefined,
+  },
+  formCard: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 460 : undefined,
   },
   header: {
     marginBottom: 40,
@@ -179,25 +188,34 @@ const styles = StyleSheet.create({
     elevation: 1,
   },
   icon: {
-    marginRight: 10,
+    marginRight: 12,
   },
   input: {
     flex: 1,
-    paddingVertical: 18,
+    paddingVertical: 16,
     fontSize: 16,
   },
+  inputWeb: {
+    outlineWidth: 0,
+    outlineStyle: "none",
+  } as any,
   button: {
     backgroundColor: "#6C3EF4",
-    paddingVertical: 18,
+    paddingVertical: 16,
     borderRadius: 18,
     marginTop: 10,
-    marginBottom: 30,
+    marginBottom: 24,
+    shadowColor: "#6C3EF4",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    elevation: 3,
   },
   buttonText: {
     color: "#fff",
     textAlign: "center",
     fontWeight: "bold",
-    fontSize: 18,
+    fontSize: 16,
   },
   footer: {
     flexDirection: "row",

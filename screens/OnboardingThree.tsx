@@ -9,6 +9,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  Platform,
 } from "react-native";
 
 import { useTranslation } from "../services/localization";
@@ -49,78 +50,80 @@ export default function OnboardingThree() {
 
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
 
-      <View style={styles.topRow}>
+      <View style={styles.formCard}>
+        <View style={styles.topRow}>
 
-        <View style={styles.dotsContainer}>
-          <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
-          <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
-          <View style={[styles.dot, styles.activeDot, { backgroundColor: themeColors.primary }]} />
+          <View style={styles.dotsContainer}>
+            <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
+            <View style={[styles.dot, { backgroundColor: themeColors.border }]} />
+            <View style={[styles.dot, styles.activeDot, { backgroundColor: themeColors.primary }]} />
+          </View>
+
+          <TouchableOpacity
+            onPress={handleSkip}
+          >
+            <Text style={[styles.skip, { color: themeColors.subText }]}>
+              {t("skip")}
+            </Text>
+          </TouchableOpacity>
+
+        </View>
+
+        <View style={styles.centerSection}>
+
+          <View style={styles.chartContainer}>
+
+            <View style={[styles.bar, { height: 70 }]} />
+            <View style={[styles.bar, { height: 120 }]} />
+            <View style={[styles.bar, { height: 180 }]} />
+            <View style={[styles.bar, { height: 100 }]} />
+            <View style={[styles.bar, { height: 150 }]} />
+
+          </View>
+
+          <View style={[styles.editCircle, { backgroundColor: themeColors.card }]}>
+
+            <Ionicons
+              name="create-outline"
+              size={30}
+              color="#EC4899"
+            />
+
+          </View>
+
+          <View style={[styles.tag, styles.csvTag]}>
+            <Text style={styles.tagText}>CSV</Text>
+          </View>
+
+          <View style={[styles.tag, styles.aiTag]}>
+            <Text style={styles.tagText}>AI</Text>
+          </View>
+
+        </View>
+
+        <View style={styles.textSection}>
+
+          <Text style={[styles.title, { color: themeColors.text }]}>
+            {t("onboarding3_title")}
+          </Text>
+
+          <Text style={[styles.subtitle, { color: themeColors.subText }]}>
+            {t("onboarding3_sub")}
+          </Text>
+
         </View>
 
         <TouchableOpacity
-          onPress={handleSkip}
+          style={[styles.button, { backgroundColor: themeColors.primary }]}
+          onPress={handleGetStarted}
         >
-          <Text style={[styles.skip, { color: themeColors.subText }]}>
-            {t("skip")}
+
+          <Text style={styles.buttonText}>
+            {t("get_started")}
           </Text>
+
         </TouchableOpacity>
-
       </View>
-
-      <View style={styles.centerSection}>
-
-        <View style={styles.chartContainer}>
-
-          <View style={[styles.bar, { height: 70 }]} />
-          <View style={[styles.bar, { height: 120 }]} />
-          <View style={[styles.bar, { height: 180 }]} />
-          <View style={[styles.bar, { height: 100 }]} />
-          <View style={[styles.bar, { height: 150 }]} />
-
-        </View>
-
-        <View style={[styles.editCircle, { backgroundColor: themeColors.card }]}>
-
-          <Ionicons
-            name="create-outline"
-            size={30}
-            color="#EC4899"
-          />
-
-        </View>
-
-        <View style={[styles.tag, styles.csvTag]}>
-          <Text style={styles.tagText}>CSV</Text>
-        </View>
-
-        <View style={[styles.tag, styles.aiTag]}>
-          <Text style={styles.tagText}>AI</Text>
-        </View>
-
-      </View>
-
-      <View style={styles.textSection}>
-
-        <Text style={[styles.title, { color: themeColors.text }]}>
-          {t("onboarding3_title")}
-        </Text>
-
-        <Text style={[styles.subtitle, { color: themeColors.subText }]}>
-          {t("onboarding3_sub")}
-        </Text>
-
-      </View>
-
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: themeColors.primary }]}
-        onPress={handleGetStarted}
-      >
-
-        <Text style={styles.buttonText}>
-          {t("get_started")}
-        </Text>
-
-      </TouchableOpacity>
 
     </View>
 
@@ -133,8 +136,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#fff",
     paddingHorizontal: 24,
-    paddingTop: 60,
+    paddingTop: Platform.OS === "web" ? 20 : 60,
     paddingBottom: 40,
+    justifyContent: "space-between",
+    alignItems: Platform.OS === "web" ? "center" : undefined,
+  },
+
+  formCard: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 520 : undefined,
+    flex: 1,
     justifyContent: "space-between",
   },
 
@@ -188,7 +199,7 @@ const styles = StyleSheet.create({
   editCircle: {
     position: "absolute",
     top: 10,
-    right: 30,
+    right: Platform.OS === "web" ? 120 : 30,
     width: 70,
     height: 70,
     borderRadius: 35,
@@ -207,14 +218,14 @@ const styles = StyleSheet.create({
 
   csvTag: {
     backgroundColor: "#22C55E",
-    left: 10,
+    left: Platform.OS === "web" ? 110 : 10,
     top: 100,
   },
 
   aiTag: {
     backgroundColor: "#EC4899",
-    right: 10,
-    bottom: 40,
+    right: Platform.OS === "web" ? 110 : 10,
+    bottom: Platform.OS === "web" ? 20 : 40,
   },
 
   tagText: {

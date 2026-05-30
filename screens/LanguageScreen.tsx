@@ -10,6 +10,7 @@ import {
   TouchableOpacity,
   View,
   Alert,
+  Platform,
 } from "react-native";
 
 import { setCurrentLanguage } from "../services/localization";
@@ -59,76 +60,78 @@ export default function LanguageScreen() {
 
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
 
-      <View style={styles.header}>
+      <View style={styles.formCard}>
+        <View style={styles.header}>
 
-        <Text style={styles.title}>
-          Choose Your Language
+          <Text style={styles.title}>
+            Choose Your Language
+          </Text>
+
+        </View>
+
+        <Text style={[styles.subtitle, { color: themeColors.subText }]}>
+          Select your preferred language to continue
         </Text>
 
+        <ScrollView showsVerticalScrollIndicator={false} style={{ flex: 1, marginBottom: 12 }}>
+
+          {Array.isArray(languages) && languages.map((item) => (
+
+            <TouchableOpacity
+              key={item.id}
+              style={[styles.card, { backgroundColor: themeColors.card }]}
+              onPress={() => setSelected(item.id)}
+            >
+
+              <View style={styles.leftSection}>
+
+                <View style={styles.iconCircle}>
+
+                  <Text style={styles.iconText}>
+                    {item.icon}
+                  </Text>
+
+                </View>
+
+                <View>
+
+                  <Text style={[styles.languageText, { color: themeColors.text }]}>
+                    {item.name}
+                  </Text>
+
+                  <Text style={[styles.subText, { color: themeColors.subText }]}>
+                    {item.sub}
+                  </Text>
+
+                </View>
+
+              </View>
+
+              <View
+                style={[
+                  styles.radio,
+                  { borderColor: themeColors.border },
+                  selected === item.id && { backgroundColor: themeColors.primary, borderColor: themeColors.primary },
+                ]}
+              />
+
+            </TouchableOpacity>
+
+          ))}
+
+        </ScrollView>
+
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: themeColors.primary }]}
+          onPress={handleContinue}
+        >
+
+          <Text style={styles.buttonText}>
+            Continue
+          </Text>
+
+        </TouchableOpacity>
       </View>
-
-      <Text style={[styles.subtitle, { color: themeColors.subText }]}>
-        Select your preferred language to continue
-      </Text>
-
-      <ScrollView showsVerticalScrollIndicator={false}>
-
-        {Array.isArray(languages) && languages.map((item) => (
-
-          <TouchableOpacity
-            key={item.id}
-            style={[styles.card, { backgroundColor: themeColors.card }]}
-            onPress={() => setSelected(item.id)}
-          >
-
-            <View style={styles.leftSection}>
-
-              <View style={styles.iconCircle}>
-
-                <Text style={styles.iconText}>
-                  {item.icon}
-                </Text>
-
-              </View>
-
-              <View>
-
-                <Text style={[styles.languageText, { color: themeColors.text }]}>
-                  {item.name}
-                </Text>
-
-                <Text style={[styles.subText, { color: themeColors.subText }]}>
-                  {item.sub}
-                </Text>
-
-              </View>
-
-            </View>
-
-            <View
-              style={[
-                styles.radio,
-                { borderColor: themeColors.border },
-                selected === item.id && { backgroundColor: themeColors.primary, borderColor: themeColors.primary },
-              ]}
-            />
-
-          </TouchableOpacity>
-
-        ))}
-
-      </ScrollView>
-
-      <TouchableOpacity
-        style={[styles.button, { backgroundColor: themeColors.primary }]}
-        onPress={handleContinue}
-      >
-
-        <Text style={styles.buttonText}>
-          Continue
-        </Text>
-
-      </TouchableOpacity>
 
     </SafeAreaView>
 
@@ -141,26 +144,35 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#ECEBFA",
-    padding: 20,
+    paddingHorizontal: 20,
+    paddingTop: Platform.OS === "web" ? 20 : 40,
+    alignItems: Platform.OS === "web" ? "center" : undefined,
+    justifyContent: Platform.OS === "web" ? "center" : undefined,
+  },
+
+  formCard: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 480 : undefined,
+    flex: 1,
   },
 
   header: {
     backgroundColor: "#6C3EF4",
-    paddingVertical: 30,
+    paddingVertical: 24,
     borderRadius: 16,
-    marginTop: 20,
+    marginTop: Platform.OS === "web" ? 10 : 20,
   },
 
   title: {
     color: "#fff",
-    fontSize: 28,
+    fontSize: 26,
     fontWeight: "bold",
     textAlign: "center",
   },
 
   subtitle: {
     textAlign: "center",
-    marginVertical: 20,
+    marginVertical: 18,
     color: "#666",
     fontSize: 15,
   },
@@ -168,8 +180,8 @@ const styles = StyleSheet.create({
   card: {
     backgroundColor: "#fff",
     borderRadius: 20,
-    padding: 18,
-    marginBottom: 18,
+    padding: 16,
+    marginBottom: 14,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -181,23 +193,23 @@ const styles = StyleSheet.create({
   },
 
   iconCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     backgroundColor: "#6C3EF4",
     justifyContent: "center",
     alignItems: "center",
-    marginRight: 15,
+    marginRight: 14,
   },
 
   iconText: {
     color: "#fff",
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "bold",
   },
 
   languageText: {
-    fontSize: 22,
+    fontSize: 18,
     fontWeight: "bold",
     color: "#111",
   },
@@ -205,12 +217,13 @@ const styles = StyleSheet.create({
   subText: {
     color: "#777",
     marginTop: 2,
+    fontSize: 13,
   },
 
   radio: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     borderWidth: 2,
     borderColor: "#ccc",
   },
@@ -222,16 +235,16 @@ const styles = StyleSheet.create({
 
   button: {
     backgroundColor: "#6C3EF4",
-    padding: 18,
+    padding: 16,
     borderRadius: 14,
-    marginBottom: 20,
+    marginBottom: Platform.OS === "web" ? 10 : 20,
     marginTop: 10,
   },
 
   buttonText: {
     color: "#fff",
     textAlign: "center",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
   },
 

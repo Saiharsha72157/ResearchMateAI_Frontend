@@ -254,7 +254,8 @@ export default function SavedResearchScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: Platform.OS === "ios" ? 60 : 40,
+    paddingTop: Platform.OS === "web" ? 20 : Platform.OS === "ios" ? 60 : 40,
+    alignItems: Platform.OS === "web" ? "center" as const : undefined,
   },
   header: {
     flexDirection: "row",
@@ -262,6 +263,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 16,
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 960 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
   },
   backButton: {
     width: 44,
@@ -296,6 +300,9 @@ const styles = StyleSheet.create({
   searchSection: {
     paddingHorizontal: 20,
     marginBottom: 16,
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 960 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
   },
   searchBar: {
     flexDirection: "row",
@@ -346,6 +353,9 @@ const styles = StyleSheet.create({
   scrollContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 960 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" as const : undefined,
   },
   card: {
     borderRadius: 18,

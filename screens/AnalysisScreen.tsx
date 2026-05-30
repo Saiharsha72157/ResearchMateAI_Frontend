@@ -10,6 +10,7 @@ import {
   Alert,
   Modal,
   TextInput,
+  Platform,
 } from "react-native";
 
 import * as DocumentPicker from "expo-document-picker";
@@ -198,7 +199,7 @@ export default function AnalysisScreen() {
   return (
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
       {analysisResult && !loading ? (
-        <View style={{ flex: 1 }}>
+        <View style={styles.contentWrapper}>
           {/* Header to display on the dynamic report screen */}
           <View style={styles.resultsHeaderContainer}>
             <TouchableOpacity
@@ -221,26 +222,21 @@ export default function AnalysisScreen() {
         </View>
       ) : (
         <ScrollView showsVerticalScrollIndicator={false}>
-          <View style={styles.header}>
-            <TouchableOpacity
-              style={[styles.backButton, { backgroundColor: themeColors.card }]}
-              onPress={() => navigation.goBack()}
-            >
-              <Ionicons
-                name="arrow-back"
-                size={24}
-                color={themeColors.text}
-              />
-            </TouchableOpacity>
-
-            <TouchableOpacity>
-              <Ionicons
-                name="ellipsis-horizontal"
-                size={24}
-                color={themeColors.text}
-              />
-            </TouchableOpacity>
-          </View>
+          <View style={styles.contentWrapper}>
+            {navigation.canGoBack() && (
+              <View style={styles.header}>
+                <TouchableOpacity
+                  style={[styles.backButton, { backgroundColor: themeColors.card }]}
+                  onPress={() => navigation.goBack()}
+                >
+                  <Ionicons
+                    name="arrow-back"
+                    size={24}
+                    color={themeColors.text}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
 
           <Text style={[styles.title, { color: themeColors.text }]}>
             {t("csv_analysis")}
@@ -378,7 +374,8 @@ export default function AnalysisScreen() {
               </Text>
             </View>
           )}
-        </ScrollView>
+        </View>
+      </ScrollView>
       )}
 
       {/* Premium Graph Config Dialog Modal */}
@@ -448,12 +445,19 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F3F1FF",
     paddingHorizontal: 20,
-    paddingTop: 60,
+    paddingTop: Platform.OS === "web" ? 20 : 60,
+  },
+
+  contentWrapper: {
+    width: "100%",
+    maxWidth: Platform.OS === "web" ? 960 : undefined,
+    alignSelf: Platform.OS === "web" ? "center" : undefined,
+    flex: 1,
+    paddingBottom: 40,
   },
 
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     marginBottom: 24,
   },
