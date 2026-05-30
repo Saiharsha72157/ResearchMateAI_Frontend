@@ -16,9 +16,10 @@ import React, { useCallback } from "react";
 import { useTranslation } from "../services/localization";
 
 import { useAppTheme } from "../services/ThemeContext";
+import { useAuth } from "../services/AuthContext";
 
 export default function DashboardScreen() {
-
+  const { user } = useAuth();
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
   const { themeColors } = useAppTheme();
@@ -95,7 +96,7 @@ export default function DashboardScreen() {
               {t("welcome_back")}
             </Text>
             <Text style={[styles.name, { color: themeColors.text }]}>
-              ResearchMate AI
+              {user?.fullName || user?.username || "Researcher"}
             </Text>
           </View>
 
