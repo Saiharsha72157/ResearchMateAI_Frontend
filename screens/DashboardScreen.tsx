@@ -83,6 +83,20 @@ export default function DashboardScreen() {
     }
   }, [navigation]);
 
+  const getInitials = () => {
+    if (user?.fullName) {
+      const parts = user.fullName.trim().split(" ");
+      if (parts.length > 1 && parts[0] && parts[1]) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return parts[0] ? parts[0][0].toUpperCase() : "RM";
+    }
+    if (user?.username) {
+      return user.username.slice(0, 2).toUpperCase();
+    }
+    return "RM";
+  };
+
   return (
 
     <View style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -90,8 +104,7 @@ export default function DashboardScreen() {
       <ScrollView showsVerticalScrollIndicator={false}>
 
         <View style={styles.header}>
-
-          <View>
+          <View style={styles.headerLeft}>
             <Text style={[styles.welcome, { color: themeColors.subText }]}>
               {t("welcome_back")}
             </Text>
@@ -99,7 +112,16 @@ export default function DashboardScreen() {
               {user?.fullName || user?.username || "Researcher"}
             </Text>
           </View>
-
+          
+          <TouchableOpacity
+            style={[styles.avatarCircle, { backgroundColor: themeColors.primary }]}
+            onPress={() => navigation.navigate("Profile")}
+            activeOpacity={0.8}
+          >
+            <Text style={styles.avatarCircleText}>
+              {getInitials()}
+            </Text>
+          </TouchableOpacity>
         </View>
 
         <View style={styles.banner}>
@@ -202,16 +224,42 @@ const styles = StyleSheet.create({
     marginBottom: 30,
   },
 
+  headerLeft: {
+    flexDirection: "column",
+    justifyContent: "center",
+  },
+
   welcome: {
-    fontSize: 16,
-    color: "#6B7280",
+    fontSize: 12,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
   },
 
   name: {
-    fontSize: 30,
-    fontWeight: "bold",
-    color: "#111827",
-    marginTop: 6,
+    fontSize: 24,
+    fontWeight: "800",
+    marginTop: 4,
+    letterSpacing: -0.5,
+  },
+
+  avatarCircle: {
+    width: 46,
+    height: 46,
+    borderRadius: 23,
+    justifyContent: "center",
+    alignItems: "center",
+    elevation: 3,
+    shadowColor: "#000",
+    shadowOpacity: 0.1,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+  },
+
+  avatarCircleText: {
+    color: "#fff",
+    fontSize: 15,
+    fontWeight: "700",
   },
 
 
