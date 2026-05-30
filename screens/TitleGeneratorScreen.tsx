@@ -10,13 +10,22 @@ import {
   TouchableOpacity,
   View,
   Platform,
+  Alert,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
-import { generateTitles, handleApiError, ProjectItem } from "../services/api";
+import { 
+  generateTitles, 
+  handleApiError, 
+  ProjectItem,
+  getTitleBookmarks,
+  addTitleBookmark,
+  removeTitleBookmark,
+  TitleBookmark
+} from "../services/api";
 import { useTranslation } from "../services/localization";
 import { useAppTheme } from "../services/ThemeContext";
 
@@ -51,6 +60,60 @@ export default function TitleGeneratorScreen() {
   const [projects, setProjects] = useState<ProjectItem[]>([]);
   const [selectedProject, setSelectedProject] = useState<ProjectItem | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  // Bookmarking System State
+  const [bookmarks, setBookmarks] = useState<TitleBookmark[]>([]);
+  const [bookmarksModalOpen, setBookmarksModalOpen] = useState(false);
+
+  // Fetch bookmarks on mount
+  useEffect(() => {
+    fetchBookmarks();
+  }, []);
+
+  const fetchBookmarks = async () => {
+    try {
+      const data = await getTitleBookmarks();
+      setBookmarks(data);
+    } catch (err) {
+      console.error("[BOOKMARKS] Failed to fetch bookmarks on mount:", err);
+    }
+  };
+
+  const isBookmarked = (title: string) => {
+    return bookmarks.some((b) => b.title === title);
+  };
+
+  const handleToggleBookmark = async (project: ProjectItem) => {
+    const bookmarked = isBookmarked(project.title);
+    try {
+      if (bookmarked) {
+        await removeTitleBookmark(project.title);
+        setBookmarks((prev) => prev.filter((b) => b.title !== project.title));
+      } else {
+        const newBookmark = await addTitleBookmark({
+          title: project.title,
+          department: selectedDepartment || "Research",
+          domain: selectedDomain || "AI",
+          difficulty: project.difficulty,
+          algorithms: project.algorithms || [],
+          summary: project.summary,
+          dataset: project.dataset,
+          best_algorithms_explanation: project.best_algorithms_explanation
+        });
+        setBookmarks((prev) => [newBookmark, ...prev]);
+      }
+    } catch (err: any) {
+      console.error("[BOOKMARKS] Failed to toggle bookmark:", err);
+      if (err.message?.includes("relation \"public.title_bookmarks\" does not exist")) {
+        Alert.alert(
+          "Table Missing",
+          "The 'title_bookmarks' database table was not found in your Supabase project.\n\nPlease run the SQL script provided to create it, then try bookmarking again!"
+        );
+      } else {
+        Alert.alert("Error", "Failed to update bookmark.");
+      }
+    }
+  };
 
   const handleSelectOption = (type: DropdownType, value: string) => {
     setDropdownOpen(null);
@@ -133,8 +196,8 @@ export default function TitleGeneratorScreen() {
             <Ionicons name="arrow-back" size={24} color={themeColors.text} />
           </TouchableOpacity>
 
-          <TouchableOpacity>
-            <Ionicons name="options-outline" size={24} color={themeColors.text} />
+          <TouchableOpacity onPress={() => setBookmarksModalOpen(true)}>
+            <Ionicons name="bookmarks-outline" size={24} color={themeColors.text} />
           </TouchableOpacity>
         </View>
 
@@ -200,48 +263,54 @@ export default function TitleGeneratorScreen() {
               <Text style={[styles.sectionTitle, { color: themeColors.text }]}>{t("generated_topics")}</Text>
             </View>
 
-            {projects.map((item, index) => (
-              <TouchableOpacity
-                key={index}
-                style={[styles.topicCard, { backgroundColor: themeColors.card }]}
-                onPress={() => setSelectedProject(item)}
-                activeOpacity={0.9}
-              >
-                <View style={styles.cardHeader}>
-                  <Text style={[styles.topicTitle, { color: themeColors.text }]}>{item.title}</Text>
-                  <TouchableOpacity style={styles.bookmarkBtn}>
-                    <Ionicons
-                      name="bookmark-outline"
-                      size={22}
-                      color={isDark ? "#6B7280" : "#9CA3AF"}
-                    />
-                  </TouchableOpacity>
-                </View>
+            {projects.map((item, index) => {
+              const bookmarked = isBookmarked(item.title);
+              return (
+                <TouchableOpacity
+                  key={index}
+                  style={[styles.topicCard, { backgroundColor: themeColors.card }]}
+                  onPress={() => setSelectedProject(item)}
+                  activeOpacity={0.9}
+                >
+                  <View style={styles.cardHeader}>
+                    <Text style={[styles.topicTitle, { color: themeColors.text }]}>{item.title}</Text>
+                    <TouchableOpacity 
+                      style={styles.bookmarkBtn}
+                      onPress={() => handleToggleBookmark(item)}
+                    >
+                      <Ionicons
+                        name={bookmarked ? "bookmark" : "bookmark-outline"}
+                        size={22}
+                        color={bookmarked ? "#6C3EF4" : (isDark ? "#6B7280" : "#9CA3AF")}
+                      />
+                    </TouchableOpacity>
+                  </View>
 
-                {/* Difficulty Pill */}
-                <View style={[
-                  styles.difficultyPill,
-                  { backgroundColor: getDifficultyStyles(item.difficulty).bg }
-                ]}>
-                  <Text style={[
-                    styles.difficultyText,
-                    { color: getDifficultyStyles(item.difficulty).text }
+                  {/* Difficulty Pill */}
+                  <View style={[
+                    styles.difficultyPill,
+                    { backgroundColor: getDifficultyStyles(item.difficulty).bg }
                   ]}>
-                    {item.difficulty}
-                  </Text>
-                </View>
+                    <Text style={[
+                      styles.difficultyText,
+                      { color: getDifficultyStyles(item.difficulty).text }
+                    ]}>
+                      {item.difficulty}
+                    </Text>
+                  </View>
 
-                {/* Suggested Algorithms Section */}
-                <Text style={[styles.suggestedAlgoLabel, { color: themeColors.subText }]}>Suggested Algorithms:</Text>
-                <View style={styles.algoPillsContainer}>
-                  {item.algorithms && item.algorithms.map((algo, idx) => (
-                    <View key={idx} style={[styles.algoPill, { backgroundColor: isDark ? "#1E2A3D" : "#E0F2FE" }]}>
-                      <Text style={[styles.algoPillText, { color: isDark ? "#38BDF8" : "#0369A1" }]}>{algo}</Text>
-                    </View>
-                  ))}
-                </View>
-              </TouchableOpacity>
-            ))}
+                  {/* Suggested Algorithms Section */}
+                  <Text style={[styles.suggestedAlgoLabel, { color: themeColors.subText }]}>Suggested Algorithms:</Text>
+                  <View style={styles.algoPillsContainer}>
+                    {item.algorithms && item.algorithms.map((algo, idx) => (
+                      <View key={idx} style={[styles.algoPill, { backgroundColor: isDark ? "#1E2A3D" : "#E0F2FE" }]}>
+                        <Text style={[styles.algoPillText, { color: isDark ? "#38BDF8" : "#0369A1" }]}>{algo}</Text>
+                      </View>
+                    ))}
+                  </View>
+                </TouchableOpacity>
+              );
+            })}
           </>
         ) : (
           renderEmptyState()
@@ -345,6 +414,85 @@ export default function TitleGeneratorScreen() {
             )}
           </View>
         </Pressable>
+      </Modal>
+
+      {/* Bookmarks Modal */}
+      <Modal
+        visible={bookmarksModalOpen}
+        transparent={true}
+        statusBarTranslucent={true}
+        animationType="slide"
+        onRequestClose={() => setBookmarksModalOpen(false)}
+      >
+        <View style={[styles.detailsModalOverlay, { backgroundColor: isDark ? "rgba(0,0,0,0.6)" : "rgba(108, 62, 244, 0.25)" }]}>
+          <View style={[styles.detailsModalContent, { backgroundColor: themeColors.card, borderColor: themeColors.border, borderWidth: isDark ? 1 : 0 }]}>
+            {/* Header */}
+            <View style={[styles.detailsModalHeader, { borderBottomColor: themeColors.border }]}>
+              <Text style={[styles.detailsModalTitleText, { color: themeColors.text }]}>Bookmarked Topics</Text>
+              <TouchableOpacity onPress={() => setBookmarksModalOpen(false)}>
+                <Ionicons name="close" size={24} color={themeColors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false} style={styles.detailsModalScroll}>
+              {bookmarks.length === 0 ? (
+                <View style={{ alignItems: "center", paddingVertical: 40 }}>
+                  <Ionicons name="bookmark-outline" size={48} color={themeColors.subText} />
+                  <Text style={{ color: themeColors.text, fontSize: 16, fontWeight: "bold", marginTop: 12 }}>No Bookmarks Saved</Text>
+                  <Text style={{ color: themeColors.subText, fontSize: 14, textAlign: "center", marginTop: 6, paddingHorizontal: 20 }}>
+                    Click the bookmark icon on generated research topics to save them here permanently!
+                  </Text>
+                </View>
+              ) : (
+                bookmarks.map((bookmark) => (
+                  <View
+                    key={bookmark.id}
+                    style={[styles.topicCard, { backgroundColor: isDark ? "#24242B" : "#F9FAFB", borderColor: themeColors.border, borderWidth: 1, padding: 16, marginBottom: 12 }]}
+                  >
+                    <View style={styles.cardHeader}>
+                      <TouchableOpacity 
+                        style={{ flex: 1 }}
+                        onPress={() => {
+                          setSelectedProject({
+                            title: bookmark.title,
+                            difficulty: bookmark.difficulty as any,
+                            algorithms: bookmark.algorithms,
+                            summary: bookmark.summary,
+                            dataset: bookmark.dataset,
+                            best_algorithms_explanation: bookmark.best_algorithms_explanation
+                          });
+                          setBookmarksModalOpen(false);
+                        }}
+                      >
+                        <Text style={[styles.topicTitle, { color: themeColors.text, fontSize: 16, lineHeight: 22 }]}>{bookmark.title}</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity 
+                        onPress={async () => {
+                          await removeTitleBookmark(bookmark.title);
+                          setBookmarks((prev) => prev.filter((b) => b.title !== bookmark.title));
+                        }}
+                        style={{ padding: 4 }}
+                      >
+                        <Ionicons name="trash-outline" size={18} color="#EF4444" />
+                      </TouchableOpacity>
+                    </View>
+                    <Text style={{ color: themeColors.subText, fontSize: 11, fontStyle: "italic" }}>
+                      {bookmark.department} • {bookmark.domain}
+                    </Text>
+                  </View>
+                ))
+              )}
+            </ScrollView>
+
+            {/* Close Button */}
+            <TouchableOpacity 
+              style={[styles.detailsCloseBtn, { backgroundColor: themeColors.primary }]}
+              onPress={() => setBookmarksModalOpen(false)}
+            >
+              <Text style={styles.detailsCloseBtnText}>Close</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
       </Modal>
     </View>
   );

@@ -364,9 +364,26 @@ export const paraphraseText = async (
       payload
     );
 
-
     if (!response.data || typeof response.data.paraphrased_text !== "string") {
       throw new Error("Invalid response format from server");
+    }
+
+    // Dynamic Database Sync: Save to Supabase if the user is authenticated!
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (session?.user) {
+        const resData = response.data as any;
+        await supabase.from("paraphrase_history").insert({
+          user_id: session.user.id,
+          original_text: data.text,
+          paraphrased_text: resData.paraphrased_text,
+          mode: data.mode,
+          score: resData.score || 9.0,
+          favorite: false
+        });
+      }
+    } catch (dbErr) {
+      console.warn("[API] Failed to auto-save paraphrase history to Supabase:", dbErr);
     }
 
     console.log("[API] local paraphraseText success");
@@ -388,13 +405,22 @@ export interface HistoryRecord {
 }
 
 /**
- * Fetches all paraphrasing history records from the local server
+ * Fetches all paraphrasing history records directly from Supabase
  */
 export const getParaphraseHistory = async (): Promise<HistoryRecord[]> => {
   try {
-    console.log("[API] getParaphraseHistory called");
-    const response = await api.get<HistoryRecord[]>("/paraphrase/history");
-    return response.data || [];
+    console.log("[API] getParaphraseHistory called (Supabase)");
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return [];
+
+    const { data, error } = await supabase
+      .from("paraphrase_history")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .order("timestamp", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
   } catch (error) {
     console.error("[API] getParaphraseHistory error:", error);
     throw error;
@@ -402,13 +428,23 @@ export const getParaphraseHistory = async (): Promise<HistoryRecord[]> => {
 };
 
 /**
- * Fetches all starred/favorite paraphrasing records
+ * Fetches all starred/favorite paraphrasing records directly from Supabase
  */
 export const getParaphraseFavorites = async (): Promise<HistoryRecord[]> => {
   try {
-    console.log("[API] getParaphraseFavorites called");
-    const response = await api.get<HistoryRecord[]>("/paraphrase/favorites");
-    return response.data || [];
+    console.log("[API] getParaphraseFavorites called (Supabase)");
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return [];
+
+    const { data, error } = await supabase
+      .from("paraphrase_history")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .eq("favorite", true)
+      .order("timestamp", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
   } catch (error) {
     console.error("[API] getParaphraseFavorites error:", error);
     throw error;
@@ -416,13 +452,33 @@ export const getParaphraseFavorites = async (): Promise<HistoryRecord[]> => {
 };
 
 /**
- * Toggles favorite state of a history entry
+ * Toggles favorite state of a history entry in Supabase
  */
 export const toggleParaphraseFavorite = async (id: string): Promise<HistoryRecord> => {
   try {
     console.log("[API] toggleParaphraseFavorite called for ID:", id);
-    const response = await api.post<HistoryRecord>(`/paraphrase/favorite/${id}`);
-    return response.data;
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) throw new Error("Authentication required");
+
+    // 1. Fetch current favorite status
+    const { data: current, error: fetchErr } = await supabase
+      .from("paraphrase_history")
+      .select("favorite")
+      .eq("id", id)
+      .single();
+
+    if (fetchErr) throw fetchErr;
+
+    // 2. Toggle favorite status
+    const { data, error } = await supabase
+      .from("paraphrase_history")
+      .update({ favorite: !current.favorite })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
   } catch (error) {
     console.error("[API] toggleParaphraseFavorite error:", error);
     throw error;
@@ -430,13 +486,18 @@ export const toggleParaphraseFavorite = async (id: string): Promise<HistoryRecor
 };
 
 /**
- * Deletes a paraphrasing history entry
+ * Deletes a paraphrasing history entry from Supabase
  */
 export const deleteParaphraseHistory = async (id: string): Promise<{ success: boolean; message: string }> => {
   try {
     console.log("[API] deleteParaphraseHistory called for ID:", id);
-    const response = await api.delete<{ success: boolean; message: string }>(`/paraphrase/history/${id}`);
-    return response.data;
+    const { error } = await supabase
+      .from("paraphrase_history")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+    return { success: true, message: "History entry deleted successfully." };
   } catch (error) {
     console.error("[API] deleteParaphraseHistory error:", error);
     throw error;
@@ -509,6 +570,93 @@ export const regenerateChart = async (data: {
     return response.data;
   } catch (error) {
     console.error("[API] regenerateChart error:", error);
+    throw error;
+  }
+};
+
+export interface TitleBookmark {
+  id: string;
+  user_id: string;
+  title: string;
+  department: string;
+  domain: string;
+  difficulty: string;
+  algorithms: string[];
+  summary: string;
+  dataset: string;
+  best_algorithms_explanation: string;
+  timestamp: string;
+}
+
+/**
+ * Fetches all bookmarked title plans directly from Supabase
+ */
+export const getTitleBookmarks = async (): Promise<TitleBookmark[]> => {
+  try {
+    console.log("[API] getTitleBookmarks called");
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return [];
+
+    const { data, error } = await supabase
+      .from("title_bookmarks")
+      .select("*")
+      .eq("user_id", session.user.id)
+      .order("timestamp", { ascending: false });
+
+    if (error) throw error;
+    return data || [];
+  } catch (error) {
+    console.error("[API] getTitleBookmarks error:", error);
+    throw error;
+  }
+};
+
+/**
+ * Saves a generated research title bookmark in Supabase
+ */
+export const addTitleBookmark = async (
+  bookmark: Omit<TitleBookmark, "id" | "user_id" | "timestamp">
+): Promise<TitleBookmark> => {
+  try {
+    console.log("[API] addTitleBookmark called for:", bookmark.title);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) throw new Error("Authentication required");
+
+    const { data, error } = await supabase
+      .from("title_bookmarks")
+      .insert({
+        user_id: session.user.id,
+        ...bookmark
+      })
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data;
+  } catch (error) {
+    console.error("[API] addTitleBookmark error:", error);
+    throw error;
+  }
+};
+
+/**
+ * Deletes a bookmarked research title from Supabase
+ */
+export const removeTitleBookmark = async (title: string): Promise<void> => {
+  try {
+    console.log("[API] removeTitleBookmark called for:", title);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) throw new Error("Authentication required");
+
+    const { error } = await supabase
+      .from("title_bookmarks")
+      .delete()
+      .eq("user_id", session.user.id)
+      .eq("title", title);
+
+    if (error) throw error;
+  } catch (error) {
+    console.error("[API] removeTitleBookmark error:", error);
     throw error;
   }
 };
