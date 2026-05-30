@@ -1,6 +1,6 @@
 // screens/HelpSupportScreen.tsx
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   ScrollView,
   StyleSheet,
@@ -16,25 +16,35 @@ import { Ionicons } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 import { useTranslation } from "../services/localization";
 import { useAppTheme } from "../services/ThemeContext";
+import { useAuth } from "../services/AuthContext";
+import { supabase } from "../services/supabase";
 
 export default function HelpSupportScreen() {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
   const { darkMode, themeColors } = useAppTheme();
+  const { user } = useAuth();
   const isDark = darkMode;
 
   // Help & Support States
   const [expandedFaq, setExpandedFaq] = useState<number | null>(null);
   const [feedbackType, setFeedbackType] = useState<"bug" | "feature" | "question">("bug");
-  const [feedbackEmail, setFeedbackEmail] = useState("");
+  const [feedbackEmail, setFeedbackEmail] = useState(user?.email || "");
   const [feedbackMessage, setFeedbackMessage] = useState("");
   const [submittingTicket, setSubmittingTicket] = useState(false);
+
+  // Auto pre-fill email if logged-in user details change
+  useEffect(() => {
+    if (user?.email) {
+      setFeedbackEmail(user.email);
+    }
+  }, [user]);
 
   const toggleFaq = (index: number) => {
     setExpandedFaq(expandedFaq === index ? null : index);
   };
 
-  const handleSubmitTicket = () => {
+  const handleSubmitTicket = async () => {
     if (!feedbackEmail || !feedbackMessage) {
       Alert.alert(t("required_fields"), t("required_fields_message"));
       return;
@@ -45,16 +55,41 @@ export default function HelpSupportScreen() {
       return;
     }
 
-    setSubmittingTicket(true);
-    setTimeout(() => {
-      setSubmittingTicket(false);
+    try {
+      setSubmittingTicket(true);
+
+      const { error } = await supabase
+        .from("support_tickets")
+        .insert({
+          user_id: user?.id || null, // Associates registered user if logged in
+          ticket_type: feedbackType,
+          email: feedbackEmail.trim(),
+          message: feedbackMessage.trim(),
+          status: "open"
+        });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
       Alert.alert(
         t("ticket_submitted"),
         t("ticket_submitted_message")
       );
-      setFeedbackEmail("");
       setFeedbackMessage("");
-    }, 1500);
+    } catch (err: any) {
+      console.error("[SUPPORT] Failed to submit ticket:", err);
+      if (err.message?.includes("relation \"public.support_tickets\" does not exist")) {
+        Alert.alert(
+          "Table Missing",
+          "The 'support_tickets' database table was not found in your Supabase project.\n\nPlease run the SQL script provided to create it, then try submitting again!"
+        );
+      } else {
+        Alert.alert("Submission Failed", err.message || "An error occurred while submitting.");
+      }
+    } finally {
+      setSubmittingTicket(false);
+    }
   };
 
   return (
