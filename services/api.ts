@@ -683,10 +683,10 @@ export const removeTitleBookmark = async (title: string): Promise<void> => {
  */
 export const warmUpBackend = async (): Promise<void> => {
   try {
-    console.log("[API] Proactive warm-up ping initiated");
-    api.get("/health");
+    console.log("[API] Proactive warm-up ping initiated via silent background fetch");
+    fetch("https://researchmateai-backend.onrender.com/health").catch(() => {});
   } catch (err) {
-    console.log("[API] Proactive warm-up ping background status check complete");
+    // Completely silent fallback
   }
 };
 
