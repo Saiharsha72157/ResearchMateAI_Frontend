@@ -81,9 +81,6 @@ export default function LoginScreen() {
     );
   };
 
-  const handleGoogleLogin = () => {
-    Alert.alert("Google Login", "Google authentication is simulated for now.");
-  };
 
   return (
     <KeyboardAvoidingView
@@ -184,21 +181,6 @@ export default function LoginScreen() {
               )}
             </TouchableOpacity>
 
-            <View style={styles.dividerContainer}>
-              <View style={[styles.line, { backgroundColor: themeColors.border }]} />
-              <Text style={styles.orText}>{t("or")}</Text>
-              <View style={[styles.line, { backgroundColor: themeColors.border }]} />
-            </View>
-
-            <TouchableOpacity
-              style={[styles.googleButton, { backgroundColor: themeColors.card }]}
-              onPress={handleGoogleLogin}
-            >
-              <Ionicons name="logo-google" size={24} color="#EA4335" />
-              <Text style={[styles.googleText, { color: themeColors.text }]}>
-                {t("continue_google")}
-              </Text>
-            </TouchableOpacity>
 
             <View style={styles.footer}>
               <Text style={[styles.footerText, { color: themeColors.subText }]}>
@@ -316,36 +298,6 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 17,
     letterSpacing: 0.3,
-  },
-  dividerContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 28,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-  },
-  orText: {
-    marginHorizontal: 16,
-    color: "#9CA3AF",
-    fontWeight: "600",
-    fontSize: 13,
-  },
-  googleButton: {
-    borderRadius: 16,
-    paddingVertical: 16,
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    borderWidth: 1.5,
-    borderColor: "#E5E7EB",
-    marginBottom: 28,
-  },
-  googleText: {
-    marginLeft: 12,
-    fontSize: 15,
-    fontWeight: "600",
   },
   footer: {
     flexDirection: "row",
