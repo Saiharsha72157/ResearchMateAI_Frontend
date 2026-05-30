@@ -13,6 +13,34 @@ import { ThemeProvider } from "./services/ThemeContext";
 import { AuthProvider } from "./services/AuthContext";
 import { warmUpBackend } from "./services/api";
 
+const linking = {
+  prefixes: ["https://researchmateai.netlify.app", "researchmateai://"],
+  config: {
+    screens: {
+      Language: "language",
+      OnboardingOne: "onboarding-1",
+      OnboardingTwo: "onboarding-2",
+      OnboardingThree: "onboarding-3",
+      Login: "login",
+      Signup: "signup",
+      MainApp: {
+        screens: {
+          Home: "dashboard",
+          Datasets: "datasets",
+          Analysis: "analysis",
+          Tools: "tools",
+          Profile: "profile",
+        },
+      },
+      TitleGenerator: "title-generator",
+      LanguageSettings: "settings/language",
+      HelpSupport: "help",
+      SavedResearch: "saved-research",
+      ResearchDetails: "research-details",
+    },
+  },
+};
+
 export default function App() {
   useEffect(() => {
     console.log("[App] App mounted successfully");
@@ -30,7 +58,7 @@ export default function App() {
         <ThemeProvider>
           <AuthProvider>
             <ErrorBoundary>
-              <NavigationContainer>
+              <NavigationContainer linking={linking}>
                 {Platform.OS !== "web" && <StatusBar style="auto" />}
                 <AppNavigator />
               </NavigationContainer>

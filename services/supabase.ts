@@ -3,11 +3,11 @@ import "react-native-url-polyfill/auto";
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || '';
-const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || '';
+const supabaseUrl = process.env.EXPO_PUBLIC_SUPABASE_URL || 'https://dummy.supabase.co';
+const supabaseAnonKey = process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY || 'dummy-anon-key';
 
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.warn("Supabase URL or Anon Key is missing. Ensure you have created a .env file.");
+if (supabaseUrl === 'https://dummy.supabase.co') {
+  console.warn("Supabase URL or Anon Key is missing. Using dummy configuration. Please set environment variables on your deployment host.");
 }
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
