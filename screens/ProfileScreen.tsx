@@ -23,14 +23,87 @@ import { useState } from "react";
 import { useTranslation, setCurrentLanguage } from "../services/localization";
 import { useAppTheme } from "../services/ThemeContext";
 import { useAuth } from "../services/AuthContext";
+import { supabase } from "../services/supabase";
 
 export default function ProfileScreen() {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
 
   const { darkMode, setDarkMode, themeColors } = useAppTheme();
-  const { user, logout: contextLogout } = useAuth();
+  const { user, logout: contextLogout, refreshProfile } = useAuth();
   const isDark = darkMode;
+
+  // Edit Profile States
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const [fullName, setFullName] = useState("");
+  const [username, setUsername] = useState("");
+  const [mobile, setMobile] = useState("");
+  const [bio, setBio] = useState("");
+  const [updating, setUpdating] = useState(false);
+
+  const openEditModal = () => {
+    setFullName(user?.fullName || "");
+    setUsername(user?.username || "");
+    setMobile(user?.mobile || "");
+    setBio(user?.bio || "");
+    setEditModalVisible(true);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!username.trim()) {
+      Alert.alert("Missing Fields", "Username is required.");
+      return;
+    }
+
+    try {
+      setUpdating(true);
+      
+      const { error } = await supabase
+        .from("profiles")
+        .upsert({
+          id: user?.id,
+          username: username.trim(),
+          full_name: fullName.trim(),
+          mobile: mobile.trim(),
+          bio: bio.trim(),
+          updated_at: new Date().toISOString()
+        });
+
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      await refreshProfile();
+      Alert.alert("Success", "Profile updated successfully!");
+      setEditModalVisible(false);
+    } catch (err: any) {
+      console.error("[PROFILE] Edit profile failed:", err);
+      if (err.message?.includes("relation \"public.profiles\" does not exist")) {
+        Alert.alert(
+          "Table Missing",
+          "The 'profiles' database table was not found in your Supabase project.\n\nPlease run the SQL script provided to create it, then try saving again!"
+        );
+      } else {
+        Alert.alert("Update Failed", err.message || "An error occurred while saving.");
+      }
+    } finally {
+      setUpdating(false);
+    }
+  };
+
+  const getInitials = () => {
+    if (user?.fullName) {
+      const parts = user.fullName.trim().split(" ");
+      if (parts.length > 1 && parts[0] && parts[1]) {
+        return (parts[0][0] + parts[1][0]).toUpperCase();
+      }
+      return parts[0] ? parts[0][0].toUpperCase() : "RM";
+    }
+    if (user?.username) {
+      return user.username.slice(0, 2).toUpperCase();
+    }
+    return "RM";
+  };
 
   const logout = async () => {
     await contextLogout();
@@ -46,18 +119,29 @@ export default function ProfileScreen() {
         <View style={styles.profileCard}>
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>
-              RS
+              {getInitials()}
             </Text>
           </View>
 
           <Text style={styles.name}>
-            {user?.username || "Researcher"}
+            {user?.fullName || user?.username || "Researcher"}
           </Text>
+
+          {!!user?.fullName && !!user?.username && (
+            <Text style={[styles.phone, { fontSize: 14, marginBottom: 4, opacity: 0.85 }]}>
+              @{user.username}
+            </Text>
+          )}
 
           <Text style={styles.phone}>
             {user?.mobile ? `+91 ${user.mobile}` : user?.email || "No details"}
           </Text>
 
+          {!!user?.bio && (
+            <Text style={[styles.phone, { fontStyle: "italic", marginTop: 8, textAlign: "center", fontSize: 14, paddingHorizontal: 10, color: "#E0DBFF" }]}>
+              "{user.bio}"
+            </Text>
+          )}
         </View>
 
         <Text style={[styles.sectionTitle, { color: themeColors.title }]}>
@@ -95,7 +179,10 @@ export default function ProfileScreen() {
         </Text>
 
         <View style={[styles.actionCard, { backgroundColor: themeColors.card }]}>
-          <TouchableOpacity style={[styles.actionRow, { borderBottomColor: themeColors.border }]}>
+          <TouchableOpacity 
+            style={[styles.actionRow, { borderBottomColor: themeColors.border }]}
+            onPress={openEditModal}
+          >
             <View style={styles.rowLeft}>
               <Ionicons
                 name="person-outline"
@@ -186,6 +273,100 @@ export default function ProfileScreen() {
         </TouchableOpacity>
 
       </ScrollView>
+
+      {/* Premium Edit Profile Modal */}
+      <Modal
+        animationType="slide"
+        transparent={true}
+        visible={editModalVisible}
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: themeColors.card }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: themeColors.text }]}>
+                {t("edit_profile")}
+              </Text>
+              <TouchableOpacity onPress={() => setEditModalVisible(false)}>
+                <Ionicons name="close" size={24} color={themeColors.text} />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={styles.settingsGroup}>
+                <Text style={[styles.settingsGroupTitle, { color: themeColors.primary, marginBottom: 15 }]}>
+                  Personal Information
+                </Text>
+
+                <TextInput
+                  placeholder="Full Name"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={fullName}
+                  onChangeText={setFullName}
+                  style={[styles.formInput, { 
+                    color: themeColors.text, 
+                    borderColor: themeColors.border,
+                    backgroundColor: isDark ? "#1F2937" : "#F9FAFB" 
+                  }]}
+                />
+
+                <TextInput
+                  placeholder="Username"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={username}
+                  onChangeText={setUsername}
+                  style={[styles.formInput, { 
+                    color: themeColors.text, 
+                    borderColor: themeColors.border,
+                    backgroundColor: isDark ? "#1F2937" : "#F9FAFB" 
+                  }]}
+                  autoCapitalize="none"
+                />
+
+                <TextInput
+                  placeholder="Mobile Number"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={mobile}
+                  onChangeText={setMobile}
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  style={[styles.formInput, { 
+                    color: themeColors.text, 
+                    borderColor: themeColors.border,
+                    backgroundColor: isDark ? "#1F2937" : "#F9FAFB" 
+                  }]}
+                />
+
+                <TextInput
+                  placeholder="Bio (e.g. Data Scientist / AI Researcher)"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={bio}
+                  onChangeText={setBio}
+                  multiline
+                  numberOfLines={3}
+                  style={[styles.formInput, styles.textArea, { 
+                    color: themeColors.text, 
+                    borderColor: themeColors.border,
+                    backgroundColor: isDark ? "#1F2937" : "#F9FAFB" 
+                  }]}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.submitBtn, { backgroundColor: "#6C3EF4" }, updating && { opacity: 0.8 }]}
+                onPress={handleSaveProfile}
+                disabled={updating}
+              >
+                {updating ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.submitBtnText}>Save Profile</Text>
+                )}
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

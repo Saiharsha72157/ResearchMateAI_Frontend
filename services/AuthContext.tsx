@@ -7,6 +7,9 @@ export type User = {
   email: string;
   mobile?: string;
   username?: string;
+  fullName?: string;
+  bio?: string;
+  avatarUrl?: string;
 };
 
 type AuthContextType = {
@@ -16,6 +19,7 @@ type AuthContextType = {
   register: (email: string, mobile: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
+  refreshProfile: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -52,13 +56,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     };
   }, []);
 
-  const mapSupabaseUser = (supabaseUser: SupabaseUser) => {
-    setUser({
+  const mapSupabaseUser = async (supabaseUser: SupabaseUser) => {
+    // 1. Set initial details from user authentication metadata
+    const initialUser: User = {
       id: supabaseUser.id,
       email: supabaseUser.email || "",
-      mobile: supabaseUser.user_metadata?.mobile,
-      username: supabaseUser.user_metadata?.username,
-    });
+      mobile: supabaseUser.user_metadata?.mobile || "",
+      username: supabaseUser.user_metadata?.username || "",
+      fullName: supabaseUser.user_metadata?.fullName || "",
+      bio: "",
+      avatarUrl: "",
+    };
+    setUser(initialUser);
+
+    // 2. Fetch extended profile from Supabase database 'profiles' table
+    try {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("username, full_name, mobile, bio, avatar_url")
+        .eq("id", supabaseUser.id)
+        .single();
+
+      if (data) {
+        setUser({
+          id: supabaseUser.id,
+          email: supabaseUser.email || "",
+          mobile: data.mobile || supabaseUser.user_metadata?.mobile || "",
+          username: data.username || supabaseUser.user_metadata?.username || "",
+          fullName: data.full_name || supabaseUser.user_metadata?.fullName || "",
+          bio: data.bio || "",
+          avatarUrl: data.avatar_url || "",
+        });
+      }
+    } catch (err) {
+      console.warn("[AUTH] Profiles table select error (falling back to user_metadata):", err);
+    }
   };
 
   const login = async (email: string, password: string) => {
@@ -118,8 +150,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const refreshProfile = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session?.user) {
+      await mapSupabaseUser(session.user);
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, resetPassword }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, resetPassword, refreshProfile }}>
       {children}
     </AuthContext.Provider>
   );
