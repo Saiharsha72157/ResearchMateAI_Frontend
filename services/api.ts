@@ -49,7 +49,24 @@ api.interceptors.response.use(
     });
     return response;
   },
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
+    const config = error.config as any;
+
+    // Check if the error is a timeout or gateway cold-start symptom (status 502, 503, 504 or ECONNABORTED)
+    const isTimeoutOrGateway =
+      error.code === "ECONNABORTED" ||
+      !error.response ||
+      [502, 503, 504].includes(error.response?.status);
+
+    if (isTimeoutOrGateway && config && !config._retry) {
+      config._retry = true;
+      console.warn(`[API] Cold-start timeout/gateway error detected at ${config.url}. Retrying request in 3 seconds to let server spin up...`);
+      
+      // Wait for 3 seconds to give the Render server container time to finish booting
+      await new Promise((resolve) => setTimeout(resolve, 3000));
+      return api(config);
+    }
+
     // Handle common errors
     if (!error.response) {
       console.error("[API] Network Error:", {
@@ -658,6 +675,18 @@ export const removeTitleBookmark = async (title: string): Promise<void> => {
   } catch (error) {
     console.error("[API] removeTitleBookmark error:", error);
     throw error;
+  }
+};
+
+/**
+ * Proactively pings the backend server to trigger wake-up from sleep (cold starts) in the background
+ */
+export const warmUpBackend = async (): Promise<void> => {
+  try {
+    console.log("[API] Proactive warm-up ping initiated");
+    api.get("/health");
+  } catch (err) {
+    console.log("[API] Proactive warm-up ping background status check complete");
   }
 };
 

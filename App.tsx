@@ -10,6 +10,7 @@ import AppNavigator from "./navigation/AppNavigator";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./services/ThemeContext";
 import { AuthProvider } from "./services/AuthContext";
+import { warmUpBackend } from "./services/api";
 
 export default function App() {
   useEffect(() => {
@@ -17,6 +18,9 @@ export default function App() {
     console.log("[App] Navigation Container initialized");
     console.log("[App] Safe startup validation completed");
     console.log("[App] Application loaded successfully in production-hardened mode");
+    
+    // Proactively warm up sleeping Render server containers in the background!
+    warmUpBackend();
   }, []);
 
   return (
