@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   StyleSheet,
   Text,
@@ -27,8 +27,7 @@ export default function LoginScreen() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [emailFocused, setEmailFocused] = useState(false);
-  const [passwordFocused, setPasswordFocused] = useState(false);
+  const passwordRef = useRef<TextInput>(null);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -89,13 +88,14 @@ export default function LoginScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      enabled={Platform.OS === "ios"}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "android" ? 0 : 0}
     >
       <ScrollView
         contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="always"
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="none"
       >
         <View style={styles.formCard}>
           <View style={styles.logoContainer}>
@@ -121,12 +121,11 @@ export default function LoginScreen() {
             <View style={[
               styles.inputContainer,
               { backgroundColor: themeColors.card },
-              emailFocused && styles.inputContainerFocused,
             ]}>
               <Ionicons
                 name="mail-outline"
                 size={20}
-                color={emailFocused ? "#6C3EF4" : themeColors.subText}
+                color={themeColors.subText}
                 style={styles.icon}
               />
               <TextInput
@@ -137,8 +136,10 @@ export default function LoginScreen() {
                 keyboardType="email-address"
                 style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
                 autoCapitalize="none"
-                onFocus={() => setEmailFocused(true)}
-                onBlur={() => setEmailFocused(false)}
+                autoCorrect={false}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                blurOnSubmit={false}
               />
             </View>
 
@@ -146,23 +147,24 @@ export default function LoginScreen() {
             <View style={[
               styles.inputContainer,
               { backgroundColor: themeColors.card },
-              passwordFocused && styles.inputContainerFocused,
             ]}>
               <Ionicons
                 name="lock-closed-outline"
                 size={20}
-                color={passwordFocused ? "#6C3EF4" : themeColors.subText}
+                color={themeColors.subText}
                 style={styles.icon}
               />
               <TextInput
+                ref={passwordRef}
                 placeholder="Password"
                 placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
                 style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
-                onFocus={() => setPasswordFocused(true)}
-                onBlur={() => setPasswordFocused(false)}
+                autoCorrect={false}
+                returnKeyType="done"
+                onSubmitEditing={handleLogin}
               />
             </View>
 
@@ -274,14 +276,7 @@ const styles = StyleSheet.create({
     borderWidth: 1.5,
     borderColor: "transparent",
   },
-  inputContainerFocused: {
-    borderColor: "#6C3EF4",
-    shadowColor: "#6C3EF4",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 2,
-  },
+
   icon: {
     marginRight: 10,
   },

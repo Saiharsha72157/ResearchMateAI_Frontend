@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -27,6 +27,10 @@ export default function SignupScreen() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  const mobileRef = useRef<TextInput>(null);
+  const passwordRef = useRef<TextInput>(null);
+  const confirmPasswordRef = useRef<TextInput>(null);
 
   const handleSignup = async () => {
     if (!email || !mobile || !password) {
@@ -59,13 +63,14 @@ export default function SignupScreen() {
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : undefined}
-      enabled={Platform.OS === "ios"}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      keyboardVerticalOffset={Platform.OS === "android" ? 0 : 0}
     >
       <ScrollView
         contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="always"
+        keyboardShouldPersistTaps="handled"
+        keyboardDismissMode="none"
       >
         <View style={styles.formCard}>
           <View style={styles.header}>
@@ -86,12 +91,17 @@ export default function SignupScreen() {
                 keyboardType="email-address"
                 style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
                 autoCapitalize="none"
+                autoCorrect={false}
+                returnKeyType="next"
+                onSubmitEditing={() => mobileRef.current?.focus()}
+                blurOnSubmit={false}
               />
             </View>
 
             <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
               <Ionicons name="call-outline" size={20} color={themeColors.subText} style={styles.icon} />
               <TextInput
+                ref={mobileRef}
                 placeholder="Mobile Number"
                 placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
                 value={mobile}
@@ -99,30 +109,42 @@ export default function SignupScreen() {
                 keyboardType="phone-pad"
                 maxLength={10}
                 style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                returnKeyType="next"
+                onSubmitEditing={() => passwordRef.current?.focus()}
+                blurOnSubmit={false}
               />
             </View>
 
             <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
               <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
               <TextInput
+                ref={passwordRef}
                 placeholder="Password"
                 placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
                 value={password}
                 onChangeText={setPassword}
                 secureTextEntry
                 style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                autoCorrect={false}
+                returnKeyType="next"
+                onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+                blurOnSubmit={false}
               />
             </View>
 
             <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
               <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
               <TextInput
+                ref={confirmPasswordRef}
                 placeholder="Confirm Password"
                 placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
                 value={confirmPassword}
                 onChangeText={setConfirmPassword}
                 secureTextEntry
                 style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                autoCorrect={false}
+                returnKeyType="done"
+                onSubmitEditing={handleSignup}
               />
             </View>
 
