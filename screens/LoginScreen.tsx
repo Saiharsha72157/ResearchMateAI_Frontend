@@ -94,6 +94,7 @@ export default function LoginScreen() {
       <ScrollView
         contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
         showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
         <View style={styles.formCard}>
           <View style={styles.logoContainer}>
