@@ -90,11 +90,12 @@ export default function LoginScreen() {
     <KeyboardAvoidingView
       style={{ flex: 1 }}
       behavior={Platform.OS === "ios" ? "padding" : undefined}
+      enabled={Platform.OS === "ios"}
     >
       <ScrollView
         contentContainerStyle={[styles.container, { backgroundColor: themeColors.background }]}
         showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
+        keyboardShouldPersistTaps="always"
       >
         <View style={styles.formCard}>
           <View style={styles.logoContainer}>
