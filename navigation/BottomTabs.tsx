@@ -10,6 +10,7 @@ import ProfileScreen from "../screens/ProfileScreen";
 
 import { useTranslation } from "../services/localization";
 import { useAppTheme } from "../services/ThemeContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const Tab = createBottomTabNavigator();
 
@@ -24,6 +25,7 @@ const TAB_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
 export default function BottomTabs() {
   const { t } = useTranslation();
   const { themeColors } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   return (
 
@@ -40,8 +42,8 @@ export default function BottomTabs() {
         tabBarInactiveTintColor: themeColors.subText,
 
         tabBarStyle: {
-          height: 70,
-          paddingBottom: 10,
+          height: 70 + insets.bottom,
+          paddingBottom: 10 + insets.bottom,
           paddingTop: 10,
           backgroundColor: themeColors.card,
           borderTopColor: themeColors.border,

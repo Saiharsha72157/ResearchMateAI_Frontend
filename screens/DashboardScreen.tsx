@@ -18,12 +18,14 @@ import { useTranslation } from "../services/localization";
 
 import { useAppTheme } from "../services/ThemeContext";
 import { useAuth } from "../services/AuthContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export default function DashboardScreen() {
   const { user } = useAuth();
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
   const { themeColors } = useAppTheme();
+  const insets = useSafeAreaInsets();
 
   const features = [
     {
@@ -100,7 +102,7 @@ export default function DashboardScreen() {
 
   return (
 
-    <View style={[styles.container, { backgroundColor: themeColors.background }]}>
+    <View style={[styles.container, { backgroundColor: themeColors.background, paddingTop: Platform.OS === "web" ? 20 : Math.max(60, insets.top + 20) }]}>
 
       <ScrollView showsVerticalScrollIndicator={false}>
 
@@ -217,7 +219,6 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F3F1FF",
     paddingHorizontal: 20,
-    paddingTop: Platform.OS === "web" ? 20 : 60,
   },
 
   contentWrapper: {

@@ -1,38 +1,15 @@
-import React, { useEffect } from "react";
+import React from "react";
 
 import {
   StyleSheet,
   Text,
   View,
+  ActivityIndicator,
 } from "react-native";
 
 import { Ionicons } from "@expo/vector-icons";
 
-import { useNavigation } from "@react-navigation/native";
-
 export default function SplashScreen() {
-
-  const navigation = useNavigation<any>();
-
-  useEffect(() => {
-    let isMounted = true;
-
-    const timer = setTimeout(() => {
-      try {
-        console.log("[SplashScreen] Navigating to Language screen");
-        if (isMounted && navigation) {
-          navigation.replace("Language");
-        }
-      } catch (err) {
-        console.error("[SplashScreen] Navigation replace failed:", err);
-      }
-    }, 2500);
-
-    return () => {
-      isMounted = false;
-      clearTimeout(timer);
-    };
-  }, [navigation]);
 
   return (
 
@@ -55,6 +32,12 @@ export default function SplashScreen() {
       <Text style={styles.subtitle}>
         Smart AI Research Assistant
       </Text>
+
+      <ActivityIndicator
+        size="small"
+        color="#6C3EF4"
+        style={{ marginTop: 24 }}
+      />
 
     </View>
 

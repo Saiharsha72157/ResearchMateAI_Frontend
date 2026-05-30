@@ -145,7 +145,7 @@ export default function ProfileScreen() {
 
           {!!user?.bio && (
             <Text style={[styles.phone, { fontStyle: "italic", marginTop: 8, textAlign: "center", fontSize: 14, paddingHorizontal: 10, color: "#E0DBFF" }]}>
-              "{user.bio}"
+              {`"${user.bio}"`}
             </Text>
           )}
         </View>

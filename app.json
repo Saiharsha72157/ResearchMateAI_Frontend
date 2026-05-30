@@ -8,7 +8,7 @@
     "scheme": "researchmateai",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/images/icon.png"
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +17,8 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "package": "com.sai2208.ResearchMateAI"
     },
     "web": {
       "output": "single",
@@ -37,6 +38,11 @@
       "expo-font",
       "expo-web-browser",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "a4ee5b33-2d85-47e0-a575-816c2924e874"
+      }
+    }
   }
 }
