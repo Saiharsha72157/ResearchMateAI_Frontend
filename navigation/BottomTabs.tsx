@@ -7,6 +7,7 @@ import DashboardScreen from "../screens/DashboardScreen";
 import DatasetScreen from "../screens/DatasetScreen";
 import ParaphraseScreen from "../screens/ParaphraseScreen";
 import ProfileScreen from "../screens/ProfileScreen";
+import ResearchExplorerScreen from "../screens/ResearchExplorerScreen";
 
 import { useTranslation } from "../services/localization";
 import { useAppTheme } from "../services/ThemeContext";
@@ -20,6 +21,7 @@ const TAB_ICONS: Record<string, keyof typeof Ionicons.glyphMap> = {
   Analysis: "bar-chart",
   Tools: "build",
   Profile: "person",
+  Research: "library",
 };
 
 export default function BottomTabs() {
@@ -101,6 +103,14 @@ export default function BottomTabs() {
         component={ProfileScreen}
         options={{
           tabBarLabel: t("profile")
+        }}
+      />
+
+      <Tab.Screen
+        name="Research"
+        component={ResearchExplorerScreen}
+        options={{
+          tabBarLabel: "Research" // Keeping string for now as it's a new feature and might not have a translation key yet
         }}
       />
 

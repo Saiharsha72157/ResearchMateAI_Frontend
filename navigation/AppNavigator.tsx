@@ -14,6 +14,11 @@ import LanguageSettingsScreen from "../screens/LanguageSettingsScreen";
 import HelpSupportScreen from "../screens/HelpSupportScreen";
 import SavedResearchScreen from "../screens/SavedResearchScreen";
 import ResearchDetailsScreen from "../screens/ResearchDetailsScreen";
+import ResearchExplorerScreen from "../screens/ResearchExplorerScreen";
+import ResearchResultsScreen from "../screens/ResearchResultsScreen";
+import PaperIntelligenceScreen from "../screens/PaperIntelligenceScreen";
+import ResearchDashboardScreen from "../screens/ResearchDashboardScreen";
+import ResearchAiAnalysisScreen from "../screens/ResearchAiAnalysisScreen";
 
 import BottomTabs from "./BottomTabs";
 
@@ -51,6 +56,12 @@ export default function AppNavigator() {
           <Stack.Screen name="HelpSupport" component={HelpSupportScreen} />
           <Stack.Screen name="SavedResearch" component={SavedResearchScreen} />
           <Stack.Screen name="ResearchDetails" component={ResearchDetailsScreen} />
+          {/* Research Explorer Module */}
+          <Stack.Screen name="ResearchExplorer" component={ResearchExplorerScreen} />
+          <Stack.Screen name="ResearchResults" component={ResearchResultsScreen} />
+          <Stack.Screen name="PaperIntelligence" component={PaperIntelligenceScreen} />
+          <Stack.Screen name="ResearchDashboard" component={ResearchDashboardScreen} />
+          <Stack.Screen name="ResearchAiAnalysis" component={ResearchAiAnalysisScreen} />
         </>
       )}
     </Stack.Navigator>
