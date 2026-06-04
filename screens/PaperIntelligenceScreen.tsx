@@ -5,31 +5,30 @@ import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../services/ThemeContext';
 import { Paper } from '../services/researchApi';
-import { addToHistory, toggleFavorite, getFavorites } from '../services/researchStorage';
+import { toggleFavorite, isFavorite } from '../services/researchStorage';
 
 export default function PaperIntelligenceScreen() {
   const { themeColors } = useAppTheme();
   const route = useRoute<any>();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const [isFavorite, setIsFavorite] = useState(false);
+  const [isFavoriteState, setIsFavoriteState] = useState(false);
   
   const { paper } = route.params as { paper: Paper };
 
   useEffect(() => {
     if (paper) {
-      addToHistory(paper);
       checkFavorite();
     }
   }, [paper]);
 
   const checkFavorite = async () => {
-    const favs = await getFavorites();
-    setIsFavorite(favs.some(p => p.paperId === paper.paperId));
+    const isFav = await isFavorite(paper.paperId);
+    setIsFavoriteState(isFav);
   };
 
   const handleToggleFavorite = async () => {
     const added = await toggleFavorite(paper);
-    setIsFavorite(added);
+    setIsFavoriteState(added);
   };
 
   const handleOpenPdf = () => {
@@ -56,7 +55,7 @@ export default function PaperIntelligenceScreen() {
         </TouchableOpacity>
         <Text style={[styles.headerTitle, { color: themeColors.text }]}>Paper Intelligence</Text>
         <TouchableOpacity onPress={handleToggleFavorite}>
-          <Ionicons name={isFavorite ? "heart" : "heart-outline"} size={24} color={isFavorite ? "red" : themeColors.text} />
+          <Ionicons name={isFavoriteState ? "heart" : "heart-outline"} size={24} color={isFavoriteState ? "red" : themeColors.text} />
         </TouchableOpacity>
       </View>
 

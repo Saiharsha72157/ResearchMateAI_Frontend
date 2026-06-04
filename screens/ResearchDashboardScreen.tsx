@@ -1,33 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useIsFocused } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../services/ThemeContext';
-import { getHistory, getFavorites, getReadingLists } from '../services/researchStorage';
+import { getFavorites } from '../services/researchStorage';
 import ResearchVisualAnalytics from '../components/ResearchVisualAnalytics';
 
 export default function ResearchDashboardScreen() {
   const { themeColors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
-  const [stats, setStats] = useState({ history: 0, favorites: 0, lists: 0 });
+  const isFocused = useIsFocused();
+  const [stats, setStats] = useState({ favorites: 0 });
   const [trendData, setTrendData] = useState<{ year: string; count: number }[]>([]);
 
   useEffect(() => {
     const loadStats = async () => {
-      const history = await getHistory();
       const favorites = await getFavorites();
-      const lists = await getReadingLists();
       
       setStats({
-        history: history.length,
-        favorites: favorites.length,
-        lists: lists.length
+        favorites: favorites.length
       });
 
-      // Calculate trend data based on history publication years
+      // Calculate trend data based on favorites publication years
       const yearsMap: Record<string, number> = {};
-      history.forEach(p => {
+      favorites.forEach(p => {
         if (p.year) {
           yearsMap[p.year] = (yearsMap[p.year] || 0) + 1;
         }
@@ -38,8 +35,10 @@ export default function ResearchDashboardScreen() {
       setTrendData(trends.slice(-5)); // Last 5 years
     };
     
-    loadStats();
-  }, []);
+    if (isFocused) {
+      loadStats();
+    }
+  }, [isFocused]);
 
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
@@ -53,29 +52,22 @@ export default function ResearchDashboardScreen() {
 
       <ScrollView style={styles.content}>
         <View style={styles.statsRow}>
-          <StatCard title="Viewed" count={stats.history} icon="time" color="#2196F3" />
-          <StatCard title="Saved" count={stats.favorites} icon="heart" color="#E91E63" />
-          <StatCard title="Collections" count={stats.lists} icon="folder" color="#FF9800" />
+          <StatCard title="Saved Papers" count={stats.favorites} icon="heart" color="#E91E63" />
         </View>
 
-        <ResearchVisualAnalytics data={trendData.length > 0 ? trendData : [{ year: '2024', count: 1 }]} />
+        {trendData.length > 0 && (
+          <ResearchVisualAnalytics data={trendData} />
+        )}
 
         <TouchableOpacity 
-          style={[styles.listCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}
+          style={[styles.listCard, { backgroundColor: themeColors.card, borderColor: themeColors.border, marginTop: 20 }]}
+          onPress={() => {
+            // Optional: navigate to a saved papers list screen if it exists
+          }}
         >
           <View style={styles.listCardLeft}>
             <Ionicons name="heart" size={24} color="#E91E63" />
             <Text style={[styles.listCardTitle, { color: themeColors.text }]}>Favorite Papers</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={themeColors.subText} />
-        </TouchableOpacity>
-        
-        <TouchableOpacity 
-          style={[styles.listCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}
-        >
-          <View style={styles.listCardLeft}>
-            <Ionicons name="time" size={24} color="#2196F3" />
-            <Text style={[styles.listCardTitle, { color: themeColors.text }]}>Recent History</Text>
           </View>
           <Ionicons name="chevron-forward" size={20} color={themeColors.subText} />
         </TouchableOpacity>

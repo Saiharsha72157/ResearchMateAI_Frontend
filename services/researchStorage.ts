@@ -1,99 +1,120 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { supabase } from './supabase';
 import { Paper } from './researchApi';
 
-const HISTORY_KEY = '@research_history';
-const FAVORITES_KEY = '@research_favorites';
-const LISTS_KEY = '@research_lists';
-
-export interface ResearchList {
-  id: string;
-  name: string;
-  papers: Paper[];
-}
-
-export const getHistory = async (): Promise<Paper[]> => {
-  try {
-    const data = await AsyncStorage.getItem(HISTORY_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (e) {
-    console.error('Error getting history', e);
-    return [];
-  }
-};
-
-export const addToHistory = async (paper: Paper) => {
-  try {
-    const history = await getHistory();
-    const updated = [paper, ...history.filter(p => p.paperId !== paper.paperId)].slice(0, 100);
-    await AsyncStorage.setItem(HISTORY_KEY, JSON.stringify(updated));
-  } catch (e) {
-    console.error('Error adding to history', e);
-  }
-};
-
+/**
+ * Get all favorite papers for the current user from Supabase
+ */
 export const getFavorites = async (): Promise<Paper[]> => {
   try {
-    const data = await AsyncStorage.getItem(FAVORITES_KEY);
-    return data ? JSON.parse(data) : [];
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return [];
+
+    const { data, error } = await supabase
+      .from('research_favorites')
+      .select('*')
+      .eq('user_id', session.user.id)
+      .order('created_at', { ascending: false });
+
+    if (error) throw error;
+
+    // Map database rows back to Paper interface
+    return (data || []).map(row => ({
+      paperId: row.paper_id,
+      title: row.title,
+      abstract: row.abstract,
+      year: row.year,
+      authors: row.authors || [],
+      citationCount: row.citation_count,
+      referenceCount: row.reference_count,
+      isOpenAccess: row.is_open_access,
+      openAccessPdf: row.open_access_pdf,
+      fieldsOfStudy: row.fields_of_study || [],
+      url: row.url,
+      venue: row.venue
+    }));
   } catch (e) {
-    console.error('Error getting favorites', e);
+    console.error('Error getting favorites from Supabase', e);
     return [];
   }
 };
 
-export const toggleFavorite = async (paper: Paper) => {
+/**
+ * Toggle a paper's favorite status in Supabase
+ */
+export const toggleFavorite = async (paper: Paper): Promise<boolean> => {
   try {
-    const favorites = await getFavorites();
-    const exists = favorites.find(p => p.paperId === paper.paperId);
-    let updated;
-    if (exists) {
-      updated = favorites.filter(p => p.paperId !== paper.paperId);
-    } else {
-      updated = [paper, ...favorites];
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) throw new Error("Authentication required");
+
+    // Check if it already exists
+    const { data: existing, error: fetchErr } = await supabase
+      .from('research_favorites')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('paper_id', paper.paperId)
+      .maybeSingle();
+
+    if (fetchErr && fetchErr.code !== 'PGRST116') {
+      throw fetchErr;
     }
-    await AsyncStorage.setItem(FAVORITES_KEY, JSON.stringify(updated));
-    return !exists;
+
+    if (existing) {
+      // Remove favorite
+      const { error: deleteErr } = await supabase
+        .from('research_favorites')
+        .delete()
+        .eq('id', existing.id);
+      
+      if (deleteErr) throw deleteErr;
+      return false; // No longer favorite
+    } else {
+      // Add favorite
+      const { error: insertErr } = await supabase
+        .from('research_favorites')
+        .insert({
+          user_id: session.user.id,
+          paper_id: paper.paperId,
+          title: paper.title,
+          abstract: paper.abstract,
+          year: paper.year,
+          authors: paper.authors,
+          citation_count: paper.citationCount,
+          reference_count: paper.referenceCount,
+          is_open_access: paper.isOpenAccess,
+          open_access_pdf: paper.openAccessPdf,
+          fields_of_study: paper.fieldsOfStudy,
+          url: paper.url,
+          venue: paper.venue
+        });
+        
+      if (insertErr) throw insertErr;
+      return true; // Is now favorite
+    }
   } catch (e) {
-    console.error('Error toggling favorite', e);
+    console.error('Error toggling favorite in Supabase', e);
     return false;
   }
 };
 
-export const getReadingLists = async (): Promise<ResearchList[]> => {
+/**
+ * Check if a paper is favored by the current user
+ */
+export const isFavorite = async (paperId: string): Promise<boolean> => {
   try {
-    const data = await AsyncStorage.getItem(LISTS_KEY);
-    return data ? JSON.parse(data) : [];
-  } catch (e) {
-    console.error('Error getting lists', e);
-    return [];
-  }
-};
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return false;
 
-export const createList = async (name: string) => {
-  try {
-    const lists = await getReadingLists();
-    const newList: ResearchList = { id: Date.now().toString(), name, papers: [] };
-    await AsyncStorage.setItem(LISTS_KEY, JSON.stringify([...lists, newList]));
-    return newList;
-  } catch (e) {
-    console.error('Error creating list', e);
-    throw e;
-  }
-};
+    const { data, error } = await supabase
+      .from('research_favorites')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .eq('paper_id', paperId)
+      .maybeSingle();
 
-export const addPaperToList = async (listId: string, paper: Paper) => {
-  try {
-    const lists = await getReadingLists();
-    const updated = lists.map(l => {
-      if (l.id === listId) {
-        if (!l.papers.find(p => p.paperId === paper.paperId)) {
-          return { ...l, papers: [...l.papers, paper] };
-        }
-      }
-      return l;
-    });
-    await AsyncStorage.setItem(LISTS_KEY, JSON.stringify(updated));
+    if (error && error.code !== 'PGRST116') throw error;
+    return !!data;
   } catch (e) {
-    console.error('Error adding paper to list', e);
+    console.error('Error checking favorite status', e);
+    return false;
   }
 };
