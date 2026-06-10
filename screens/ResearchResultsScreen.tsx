@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, FlatList, SafeAreaView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
@@ -30,6 +30,7 @@ export default function ResearchResultsScreen() {
         setPapers(response.data);
       } catch (err: any) {
         console.error(err);
+        Alert.alert("Search Error", err.message || "Failed to load research papers.");
         setError(err.message || 'Failed to fetch results');
       } finally {
         setLoading(false);

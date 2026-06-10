@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, SafeAreaView, ScrollView, TouchableOpacity, ActivityIndicator, Alert } from 'react-native';
 import { useRoute, useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppTheme } from '../services/ThemeContext';
@@ -43,8 +43,9 @@ export default function ResearchAiAnalysisScreen() {
             res = 'Unknown analysis type.';
         }
         setResult(res);
-      } catch (e) {
+      } catch (e: any) {
         console.error(e);
+        Alert.alert("Analysis Error", e.message || "Failed to generate AI analysis. Please try again later.");
       } finally {
         setLoading(false);
       }

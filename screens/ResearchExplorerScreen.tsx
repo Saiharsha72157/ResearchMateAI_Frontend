@@ -4,11 +4,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { useAppTheme } from '../services/ThemeContext';
+import { useTranslation } from '../services/localization';
 import { searchPapers } from '../services/researchApi';
 import FilterModal from '../components/FilterModal';
 
 export default function ResearchExplorerScreen() {
   const { themeColors } = useAppTheme();
+  const { t } = useTranslation();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(false);

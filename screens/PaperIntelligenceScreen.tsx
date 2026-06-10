@@ -90,17 +90,15 @@ export default function PaperIntelligenceScreen() {
           </Text>
         </View>
 
-        <View style={[styles.section, { borderTopColor: themeColors.border }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>AI Research Analysis</Text>
-          <View style={styles.actionGrid}>
-            <ActionCard icon="bulb" label="Key Insights" color="#FF9800" onPress={() => navigateToAnalysis('insights')} />
-            <ActionCard icon="document-text" label="Summarize" color="#2196F3" onPress={() => navigateToAnalysis('summarize')} />
-            <ActionCard icon="school" label="Beginner Mode" color="#4CAF50" onPress={() => navigateToAnalysis('beginner')} />
-            <ActionCard icon="easel" label="Generate PPT" color="#9C27B0" onPress={() => navigateToAnalysis('ppt')} />
-            <ActionCard icon="library" label="Literature Review" color="#607D8B" onPress={() => navigateToAnalysis('review')} />
-            <ActionCard icon="newspaper" label="Citation" color="#E91E63" onPress={() => navigateToAnalysis('citation')} />
+        {paper.isOpenAccess && (
+          <View style={[styles.section, { borderTopColor: themeColors.border }]}>
+            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>AI Research Analysis</Text>
+            <View style={styles.actionGrid}>
+              <ActionCard icon="bulb" label="Key Insights" color="#FF9800" onPress={() => navigateToAnalysis('insights')} />
+              <ActionCard icon="document-text" label="Summarize" color="#2196F3" onPress={() => navigateToAnalysis('summarize')} />
+            </View>
           </View>
-        </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );

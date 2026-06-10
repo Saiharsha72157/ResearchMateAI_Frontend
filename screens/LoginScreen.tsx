@@ -40,7 +40,12 @@ export default function LoginScreen() {
       await login(email.trim(), password);
       // AuthContext will handle navigation via AppNavigator
     } catch (error: any) {
-      Alert.alert("Login Failed", error.message || "Invalid credentials.");
+      const errorMsg = error.message || "";
+      if (errorMsg.includes("Invalid login credentials") || errorMsg.includes("Invalid credentials")) {
+        Alert.alert("Login Failed", "Incorrect password or email. Please try again.");
+      } else {
+        Alert.alert("Login Failed", errorMsg || "Invalid credentials.");
+      }
     } finally {
       setLoading(false);
     }

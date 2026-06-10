@@ -63,6 +63,15 @@ export default function DashboardScreen() {
       type: "tab",
       color: "#EC4899",
     },
+
+    {
+      title: "Research",
+      subtitle: "Explore Research Papers",
+      icon: "library-outline",
+      screen: "Research",
+      type: "tab",
+      color: "#F59E0B",
+    },
   ];
 
   const handleNavigate = useCallback((screenName: string, isTab: boolean = false, nestedScreen?: string) => {

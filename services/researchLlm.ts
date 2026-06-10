@@ -13,7 +13,7 @@ const generateWithGroq = async (prompt: string, returnJson: boolean = false): Pr
     const response = await axios.post(
       GROQ_URL,
       {
-        model: 'llama3-8b-8192', // Fast, default Groq model. Can be changed to llama3-70b-8192
+        model: 'llama-3.1-8b-instant', // Updated from deprecated llama3-8b-8192
         messages: [{ role: 'user', content: prompt }],
         response_format: returnJson ? { type: 'json_object' } : { type: 'text' },
       },

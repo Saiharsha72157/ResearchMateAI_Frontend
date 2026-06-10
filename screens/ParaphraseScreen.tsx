@@ -100,8 +100,9 @@ export default function ParaphraseScreen() {
     try {
       const data = await getParaphraseHistory();
       setHistoryList(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error loading history list:", err);
+      Alert.alert("Error", err.message || "Failed to load history list.");
     } finally {
       setListLoading(false);
     }
@@ -112,8 +113,9 @@ export default function ParaphraseScreen() {
     try {
       const data = await getParaphraseFavorites();
       setFavoritesList(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error loading favorites list:", err);
+      Alert.alert("Error", err.message || "Failed to load favorites list.");
     } finally {
       setListLoading(false);
     }
@@ -247,8 +249,9 @@ export default function ParaphraseScreen() {
           favorite: !selectedRecord.favorite
         });
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error favoriting record:", err);
+      Alert.alert("Error", err.message || "Failed to toggle favorite status.");
     }
   };
 
@@ -267,8 +270,9 @@ export default function ParaphraseScreen() {
               fetchHistory();
               fetchFavorites();
               setDetailVisible(false);
-            } catch (err) {
+            } catch (err: any) {
               console.error("Error deleting history record:", err);
+              Alert.alert("Error", err.message || "Failed to delete history record.");
             }
           }
         }

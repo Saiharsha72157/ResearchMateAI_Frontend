@@ -50,8 +50,9 @@ export default function DatasetScreen() {
       if (navigation && navigation.canGoBack()) {
         navigation.goBack();
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("[DatasetScreen] Back navigation failed:", err);
+      Alert.alert("Navigation Error", err.message || "Failed to navigate back.");
     }
   }, [navigation]);
 
@@ -271,6 +272,7 @@ export default function DatasetScreen() {
                     if (item.url) {
                       Linking.openURL(item.url).catch(err => {
                         console.error("Could not open dataset URL:", err);
+                        Alert.alert("Error", "Could not open dataset URL.");
                       });
                     }
                   }}

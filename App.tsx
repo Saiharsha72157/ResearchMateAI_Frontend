@@ -13,7 +13,7 @@ import { ThemeProvider } from "./services/ThemeContext";
 import { AuthProvider } from "./services/AuthContext";
 import { warmUpBackend } from "./services/api";
 
-const linking = {
+const linking: any = {
   prefixes: ["https://researchmateai.netlify.app", "researchmateai://"],
   config: {
     screens: {

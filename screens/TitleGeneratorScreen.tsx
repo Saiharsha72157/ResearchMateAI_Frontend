@@ -72,8 +72,9 @@ export default function TitleGeneratorScreen() {
     try {
       const data = await getTitleBookmarks();
       setBookmarks(data);
-    } catch (err) {
+    } catch (err: any) {
       console.error("[BOOKMARKS] Failed to fetch bookmarks on mount:", err);
+      Alert.alert("Error", err.message || "Failed to fetch bookmarks.");
     }
   };
 

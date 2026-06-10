@@ -13,11 +13,14 @@ export default function ResearchDashboardScreen() {
   const isFocused = useIsFocused();
   const [stats, setStats] = useState({ favorites: 0 });
   const [trendData, setTrendData] = useState<{ year: string; count: number }[]>([]);
+  const [showFavorites, setShowFavorites] = useState(false);
+  const [favoritesList, setFavoritesList] = useState<any[]>([]);
 
   useEffect(() => {
     const loadStats = async () => {
       const favorites = await getFavorites();
       
+      setFavoritesList(favorites);
       setStats({
         favorites: favorites.length
       });
@@ -55,22 +58,40 @@ export default function ResearchDashboardScreen() {
           <StatCard title="Saved Papers" count={stats.favorites} icon="heart" color="#E91E63" />
         </View>
 
-        {trendData.length > 0 && (
-          <ResearchVisualAnalytics data={trendData} />
-        )}
-
         <TouchableOpacity 
           style={[styles.listCard, { backgroundColor: themeColors.card, borderColor: themeColors.border, marginTop: 20 }]}
-          onPress={() => {
-            // Optional: navigate to a saved papers list screen if it exists
-          }}
+          onPress={() => setShowFavorites(!showFavorites)}
         >
           <View style={styles.listCardLeft}>
             <Ionicons name="heart" size={24} color="#E91E63" />
             <Text style={[styles.listCardTitle, { color: themeColors.text }]}>Favorite Papers</Text>
           </View>
-          <Ionicons name="chevron-forward" size={20} color={themeColors.subText} />
+          <Ionicons name={showFavorites ? "chevron-down" : "chevron-forward"} size={20} color={themeColors.subText} />
         </TouchableOpacity>
+
+        {showFavorites && favoritesList.length > 0 && (
+          <View style={{ marginTop: 10 }}>
+            {favoritesList.map((paper, index) => (
+              <TouchableOpacity
+                key={paper.paperId || index}
+                style={[styles.paperItem, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}
+                onPress={() => navigation.navigate('PaperIntelligence', { paper })}
+              >
+                <Text style={[styles.paperTitle, { color: themeColors.text }]} numberOfLines={2}>
+                  {paper.title}
+                </Text>
+                <Text style={[styles.paperAuthors, { color: themeColors.subText }]} numberOfLines={1}>
+                  {paper.authors?.map((a: any) => a.name).join(', ')}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+        {showFavorites && favoritesList.length === 0 && (
+          <View style={{ marginTop: 10, padding: 16, alignItems: 'center' }}>
+            <Text style={{ color: themeColors.subText }}>No favorite papers found.</Text>
+          </View>
+        )}
       </ScrollView>
     </SafeAreaView>
   );
@@ -145,5 +166,19 @@ const styles = StyleSheet.create({
   listCardTitle: {
     fontSize: 16,
     fontWeight: '600',
+  },
+  paperItem: {
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  paperTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    marginBottom: 4,
+  },
+  paperAuthors: {
+    fontSize: 14,
   }
 });

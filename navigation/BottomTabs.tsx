@@ -99,18 +99,18 @@ export default function BottomTabs() {
       />
 
       <Tab.Screen
-        name="Profile"
-        component={ProfileScreen}
+        name="Research"
+        component={ResearchExplorerScreen}
         options={{
-          tabBarLabel: t("profile")
+          tabBarLabel: t("research", { defaultValue: "Research" })
         }}
       />
 
       <Tab.Screen
-        name="Research"
-        component={ResearchExplorerScreen}
+        name="Profile"
+        component={ProfileScreen}
         options={{
-          tabBarLabel: "Research" // Keeping string for now as it's a new feature and might not have a translation key yet
+          tabBarLabel: t("profile")
         }}
       />
 
