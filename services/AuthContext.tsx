@@ -16,7 +16,7 @@ type AuthContextType = {
   user: User | null;
   loading: boolean;
   login: (identifier: string, password: string) => Promise<void>;
-  register: (email: string, mobile: string, password: string) => Promise<void>;
+  register: (email: string, mobile: string, password: string, fullName: string, username: string) => Promise<void>;
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
@@ -104,7 +104,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (email: string, mobile: string, password: string) => {
+  const register = async (email: string, mobile: string, password: string, fullName: string, username: string) => {
     try {
       ignoreSessionChange.current = true;
       const { error } = await supabase.auth.signUp({
@@ -113,6 +113,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         options: {
           data: {
             mobile,
+            fullName,
+            username,
           },
         },
       });
@@ -131,6 +133,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }, 800);
     }
   };
+
+
 
   const logout = async () => {
     const { error } = await supabase.auth.signOut();

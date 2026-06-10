@@ -22,19 +22,31 @@ export default function SignupScreen() {
   const { register } = useAuth();
   const isDark = darkMode;
 
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [mobile, setMobile] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  const lastNameRef = useRef<TextInput>(null);
+  const usernameRef = useRef<TextInput>(null);
+  const emailRef = useRef<TextInput>(null);
   const mobileRef = useRef<TextInput>(null);
   const passwordRef = useRef<TextInput>(null);
   const confirmPasswordRef = useRef<TextInput>(null);
 
   const handleSignup = async () => {
-    if (!email || !mobile || !password) {
+    if (!firstName || !lastName || !username || !email || !mobile || !password) {
       Alert.alert("Missing Fields", "Please fill in all fields.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      Alert.alert("Invalid Email", "Please enter a valid email address.");
       return;
     }
 
@@ -43,14 +55,17 @@ export default function SignupScreen() {
       return;
     }
 
-    if (mobile.replace(/[^0-9]/g, "").length !== 10) {
+    const phoneRegex = /^[0-9]{10}$/;
+    const cleanMobile = mobile.replace(/[^0-9]/g, "");
+    if (!phoneRegex.test(cleanMobile)) {
       Alert.alert("Invalid Mobile", "Please enter a valid 10-digit mobile number.");
       return;
     }
 
     try {
       setLoading(true);
-      await register(email.trim(), mobile.trim(), password);
+      const fullName = `${firstName.trim()} ${lastName.trim()}`;
+      await register(email.trim(), cleanMobile, password, fullName, username.trim());
       Alert.alert("Success", "Account created successfully. You can now log in.");
       navigation.navigate("Login");
     } catch (error: any) {
@@ -81,92 +96,143 @@ export default function SignupScreen() {
           </View>
 
           <View style={styles.form}>
-            <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
-              <Ionicons name="mail-outline" size={20} color={themeColors.subText} style={styles.icon} />
-              <TextInput
-                placeholder="Email Address"
-                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
-                autoCapitalize="none"
-                autoCorrect={false}
-                returnKeyType="next"
-                onSubmitEditing={() => mobileRef.current?.focus()}
-                blurOnSubmit={false}
-              />
-            </View>
+            <View>
+              <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+                <Ionicons name="person-outline" size={20} color={themeColors.subText} style={styles.icon} />
+                <TextInput
+                  placeholder="First Name"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={firstName}
+                  onChangeText={setFirstName}
+                  style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                  autoCapitalize="words"
+                  returnKeyType="next"
+                  onSubmitEditing={() => lastNameRef.current?.focus()}
+                  blurOnSubmit={false}
+                />
+              </View>
 
-            <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
-              <Ionicons name="call-outline" size={20} color={themeColors.subText} style={styles.icon} />
-              <TextInput
-                ref={mobileRef}
-                placeholder="Mobile Number"
-                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-                value={mobile}
-                onChangeText={setMobile}
-                keyboardType="phone-pad"
-                maxLength={10}
-                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
-                returnKeyType="next"
-                onSubmitEditing={() => passwordRef.current?.focus()}
-                blurOnSubmit={false}
-              />
-            </View>
+              <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+                <Ionicons name="person-outline" size={20} color={themeColors.subText} style={styles.icon} />
+                <TextInput
+                  ref={lastNameRef}
+                  placeholder="Last Name"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={lastName}
+                  onChangeText={setLastName}
+                  style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                  autoCapitalize="words"
+                  returnKeyType="next"
+                  onSubmitEditing={() => usernameRef.current?.focus()}
+                  blurOnSubmit={false}
+                />
+              </View>
 
-            <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
-              <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
-              <TextInput
-                ref={passwordRef}
-                placeholder="Password"
-                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
-                autoCorrect={false}
-                returnKeyType="next"
-                onSubmitEditing={() => confirmPasswordRef.current?.focus()}
-                blurOnSubmit={false}
-              />
-            </View>
+              <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+                <Ionicons name="at-outline" size={20} color={themeColors.subText} style={styles.icon} />
+                <TextInput
+                  ref={usernameRef}
+                  placeholder="Username"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={username}
+                  onChangeText={setUsername}
+                  style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                  onSubmitEditing={() => emailRef.current?.focus()}
+                  blurOnSubmit={false}
+                />
+              </View>
 
-            <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
-              <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
-              <TextInput
-                ref={confirmPasswordRef}
-                placeholder="Confirm Password"
-                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-                value={confirmPassword}
-                onChangeText={setConfirmPassword}
-                secureTextEntry
-                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
-                autoCorrect={false}
-                returnKeyType="done"
-                onSubmitEditing={handleSignup}
-              />
-            </View>
+              <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+                <Ionicons name="mail-outline" size={20} color={themeColors.subText} style={styles.icon} />
+                <TextInput
+                  ref={emailRef}
+                  placeholder="Email Address"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={email}
+                  onChangeText={setEmail}
+                  keyboardType="email-address"
+                  style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                  autoCapitalize="none"
+                  autoCorrect={false}
+                  returnKeyType="next"
+                  onSubmitEditing={() => mobileRef.current?.focus()}
+                  blurOnSubmit={false}
+                />
+              </View>
 
-            <TouchableOpacity
-              style={[styles.button, loading && { opacity: 0.8 }]}
-              onPress={handleSignup}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Sign Up</Text>
-              )}
-            </TouchableOpacity>
+              <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+                <Ionicons name="call-outline" size={20} color={themeColors.subText} style={styles.icon} />
+                <TextInput
+                  ref={mobileRef}
+                  placeholder="Mobile Number"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={mobile}
+                  onChangeText={setMobile}
+                  keyboardType="phone-pad"
+                  maxLength={10}
+                  style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                  returnKeyType="next"
+                  onSubmitEditing={() => passwordRef.current?.focus()}
+                  blurOnSubmit={false}
+                />
+              </View>
 
-            <View style={styles.footer}>
-              <Text style={[styles.footerText, { color: themeColors.subText }]}>
-                Already have an account?{" "}
-              </Text>
-              <TouchableOpacity onPress={() => navigation.navigate("Login")}>
-                <Text style={styles.footerLink}>Login</Text>
+              <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+                <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
+                <TextInput
+                  ref={passwordRef}
+                  placeholder="Password"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={password}
+                  onChangeText={setPassword}
+                  secureTextEntry
+                  style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                  autoCorrect={false}
+                  returnKeyType="next"
+                  onSubmitEditing={() => confirmPasswordRef.current?.focus()}
+                  blurOnSubmit={false}
+                />
+              </View>
+
+              <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+                <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
+                <TextInput
+                  ref={confirmPasswordRef}
+                  placeholder="Confirm Password"
+                  placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                  value={confirmPassword}
+                  onChangeText={setConfirmPassword}
+                  secureTextEntry
+                  style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                  autoCorrect={false}
+                  returnKeyType="done"
+                  onSubmitEditing={handleSignup}
+                />
+              </View>
+
+              <TouchableOpacity
+                style={[styles.button, loading && { opacity: 0.8 }]}
+                onPress={handleSignup}
+                disabled={loading}
+              >
+                {loading ? (
+                  <ActivityIndicator color="#fff" />
+                ) : (
+                  <Text style={styles.buttonText}>Sign Up</Text>
+                )}
               </TouchableOpacity>
+
+              <View style={styles.footer}>
+                <Text style={[styles.footerText, { color: themeColors.subText }]}>
+                  Already have an account?{" "}
+                </Text>
+                <TouchableOpacity onPress={() => navigation.navigate("Login")}>
+                  <Text style={styles.footerLink}>Login</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           </View>
         </View>

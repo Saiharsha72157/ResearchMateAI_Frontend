@@ -48,6 +48,18 @@ export default function App() {
     console.log("[App] Safe startup validation completed");
     console.log("[App] Application loaded successfully in production-hardened mode");
     
+    // Inject global CSS for Web to remove default input outlines globally
+    if (Platform.OS === 'web') {
+      const style = document.createElement('style');
+      style.type = 'text/css';
+      style.appendChild(document.createTextNode(`
+        input, textarea, select {
+          outline: none !important;
+        }
+      `));
+      document.head.appendChild(style);
+    }
+
     // Proactively warm up sleeping Render server containers in the background!
     warmUpBackend();
   }, []);
