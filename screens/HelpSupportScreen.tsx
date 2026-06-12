@@ -18,6 +18,7 @@ import { useTranslation } from "../services/localization";
 import { useAppTheme } from "../services/ThemeContext";
 import { useAuth } from "../services/AuthContext";
 import { supabase } from "../services/supabase";
+import { submitSupportTicket } from "../services/api";
 
 export default function HelpSupportScreen() {
   const navigation = useNavigation<any>();
@@ -58,19 +59,11 @@ export default function HelpSupportScreen() {
     try {
       setSubmittingTicket(true);
 
-      const { error } = await supabase
-        .from("support_tickets")
-        .insert({
-          user_id: user?.id || null, // Associates registered user if logged in
-          ticket_type: feedbackType,
-          email: feedbackEmail.trim(),
-          message: feedbackMessage.trim(),
-          status: "open"
-        });
-
-      if (error) {
-        throw new Error(error.message);
-      }
+      await submitSupportTicket({
+        ticket_type: feedbackType,
+        email: feedbackEmail.trim(),
+        message: feedbackMessage.trim()
+      });
 
       Alert.alert(
         t("ticket_submitted"),

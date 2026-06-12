@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from "react";
+import React, { useState, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -21,17 +21,24 @@ export default function LoginScreen() {
   const navigation = useNavigation<any>();
   const { t } = useTranslation();
   const { darkMode, themeColors } = useAppTheme();
-  const { login, resetPassword } = useAuth();
+  const { login, resetPassword, verifyOtp, updatePassword, logout } = useAuth();
   const isDark = darkMode;
 
+  const [resetStep, setResetStep] = useState<"login" | "forgot" | "otp" | "newPassword">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  
   const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   const passwordRef = useRef<TextInput>(null);
 
   const handleLogin = async () => {
+    setErrorMessage("");
     if (!email || !password) {
-      Alert.alert("Missing Fields", "Please enter both email and password.");
+      setErrorMessage("Please enter both email and password.");
       return;
     }
 
@@ -42,48 +49,83 @@ export default function LoginScreen() {
     } catch (error: any) {
       const errorMsg = error.message || "";
       if (errorMsg.includes("Invalid login credentials") || errorMsg.includes("Invalid credentials")) {
-        Alert.alert("Login Failed", "Incorrect password or email. Please try again.");
+        setErrorMessage("Incorrect password or email. Please try again.");
       } else {
-        Alert.alert("Login Failed", errorMsg || "Invalid credentials.");
+        setErrorMessage(errorMsg || "Invalid credentials.");
       }
     } finally {
       setLoading(false);
     }
   };
 
-  const handleForgotPassword = async () => {
+  const handleForgotPasswordClick = () => {
+    setErrorMessage("");
+    setResetStep("forgot");
+  };
+
+  const handleSendResetCode = async () => {
+    setErrorMessage("");
     if (!email) {
-      Alert.alert(
-        "Enter Email First",
-        "Please type your email address in the input box below first, then tap 'Forgot Password?' to receive your reset link."
-      );
+      setErrorMessage("Please enter your email address.");
       return;
     }
 
-    Alert.alert(
-      "Reset Password",
-      `Would you like to send a password reset link to ${email.trim()}?`,
-      [
-        { text: "Cancel", style: "cancel" },
-        {
-          text: "Send Link",
-          onPress: async () => {
-            try {
-              setLoading(true);
-              await resetPassword(email.trim());
-              Alert.alert(
-                "Reset Link Sent",
-                "A password reset link has been sent to your email. Please check your inbox (and spam folder)."
-              );
-            } catch (err: any) {
-              Alert.alert("Reset Failed", err.message || "Could not send reset link.");
-            } finally {
-              setLoading(false);
-            }
-          },
-        },
-      ]
-    );
+    try {
+      setLoading(true);
+      await resetPassword(email.trim());
+      Alert.alert(
+        "Recovery Code Sent",
+        "A 6-digit password reset code has been sent to your email. Please check your inbox (and spam folder)."
+      );
+      setResetStep("otp");
+    } catch (err: any) {
+      setErrorMessage(err.message || "Could not send reset code.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    setErrorMessage("");
+    if (!otp || otp.length < 6) {
+      setErrorMessage("Please enter the 6-digit code.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await verifyOtp(email.trim(), otp.trim(), "recovery");
+      // Verification successful, user is temporarily signed in, now ask for new password
+      setResetStep("newPassword");
+      setOtp("");
+    } catch (err: any) {
+      setErrorMessage(err.message || "Invalid or expired recovery code.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSaveNewPassword = async () => {
+    setErrorMessage("");
+    if (!newPassword || newPassword !== confirmNewPassword) {
+      setErrorMessage("Passwords do not match.");
+      return;
+    }
+
+    try {
+      setLoading(true);
+      await updatePassword(newPassword);
+      Alert.alert("Success", "Your password has been successfully reset! Please login with your new password.");
+      await logout(); // Ensure they are logged out so they can log in properly with the new creds
+      setResetStep("login");
+      setPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+    } catch (err: any) {
+      setErrorMessage(err.message || "Failed to update password.");
+    } finally {
+      setLoading(false);
+    }
   };
 
 
@@ -111,90 +153,267 @@ export default function LoginScreen() {
 
           <View style={styles.textContainer}>
             <Text style={[styles.title, { color: themeColors.text }]}>
-              {t("welcome_back")}
+              {resetStep === "login" && t("welcome_back")}
+              {resetStep === "forgot" && "Forgot Password"}
+              {resetStep === "otp" && "Verify Reset Code"}
+              {resetStep === "newPassword" && "Create New Password"}
             </Text>
             <Text style={[styles.subtitle, { color: themeColors.subText }]}>
-              Sign in with your email address
+              {resetStep === "login" 
+                ? "Sign in to continue to ResearchMate AI" 
+                : resetStep === "forgot"
+                  ? "Enter your email to receive a recovery code"
+                  : resetStep === "otp"
+                    ? `Enter the 6-digit code sent to ${email}`
+                    : "Create a new strong password"}
             </Text>
           </View>
 
           <View style={styles.form}>
-            {/* Email Input */}
-            <View style={[
-              styles.inputContainer,
-              { backgroundColor: themeColors.card },
-            ]}>
-              <Ionicons
-                name="mail-outline"
-                size={20}
-                color={themeColors.subText}
-                style={styles.icon}
-              />
-              <TextInput
-                placeholder="Email Address"
-                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-                value={email}
-                onChangeText={setEmail}
-                keyboardType="email-address"
-                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
-                autoCapitalize="none"
-                autoCorrect={false}
-                returnKeyType="next"
-                onSubmitEditing={() => passwordRef.current?.focus()}
-                blurOnSubmit={false}
-              />
-            </View>
+            {resetStep === "login" && (
+              <>
+                {/* Email Input */}
+                <View style={[
+                  styles.inputContainer,
+                  { backgroundColor: themeColors.card },
+                ]}>
+                  <Ionicons
+                    name="mail-outline"
+                    size={20}
+                    color={themeColors.subText}
+                    style={styles.icon}
+                  />
+                  <TextInput
+                    placeholder={t("email_address_placeholder")}
+                    placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="next"
+                    onSubmitEditing={() => passwordRef.current?.focus()}
+                    blurOnSubmit={false}
+                  />
+                </View>
 
-            {/* Password Input */}
-            <View style={[
-              styles.inputContainer,
-              { backgroundColor: themeColors.card },
-            ]}>
-              <Ionicons
-                name="lock-closed-outline"
-                size={20}
-                color={themeColors.subText}
-                style={styles.icon}
-              />
-              <TextInput
-                ref={passwordRef}
-                placeholder="Password"
-                placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
-                value={password}
-                onChangeText={setPassword}
-                secureTextEntry
-                style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
-                autoCorrect={false}
-                returnKeyType="done"
-                onSubmitEditing={handleLogin}
-              />
-            </View>
+                {/* Password Input */}
+                <View style={[
+                  styles.inputContainer,
+                  { backgroundColor: themeColors.card },
+                ]}>
+                  <Ionicons
+                    name="lock-closed-outline"
+                    size={20}
+                    color={themeColors.subText}
+                    style={styles.icon}
+                  />
+                  <TextInput
+                    ref={passwordRef}
+                    placeholder={t("password_placeholder")}
+                    placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                    value={password}
+                    onChangeText={setPassword}
+                    secureTextEntry
+                    style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                    autoCorrect={false}
+                    returnKeyType="done"
+                    onSubmitEditing={handleLogin}
+                  />
+                </View>
 
-            <TouchableOpacity style={styles.forgotPassword} onPress={handleForgotPassword} disabled={loading}>
-              <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
-            </TouchableOpacity>
+                <TouchableOpacity style={styles.forgotPassword} onPress={handleForgotPasswordClick} disabled={loading}>
+                  <Text style={styles.forgotPasswordText}>{t("forgot_password_btn")}</Text>
+                </TouchableOpacity>
 
-            <TouchableOpacity
-              style={[styles.button, loading && { opacity: 0.8 }]}
-              onPress={handleLogin}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color="#fff" />
-              ) : (
-                <Text style={styles.buttonText}>Login</Text>
-              )}
-            </TouchableOpacity>
+                {!!errorMessage && (
+                  <Text style={{ color: "#EF4444", marginBottom: 16, textAlign: "center", fontWeight: "600" }}>
+                    {errorMessage}
+                  </Text>
+                )}
 
+                <TouchableOpacity
+                  style={[styles.button, loading && { opacity: 0.8 }]}
+                  onPress={handleLogin}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.buttonText}>{t("login_btn")}</Text>
+                  )}
+                </TouchableOpacity>
 
-            <View style={styles.footer}>
-              <Text style={[styles.footerText, { color: themeColors.subText }]}>
-                Don't have an account?{" "}
-              </Text>
-              <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
-                <Text style={styles.footerLink}>Sign Up</Text>
-              </TouchableOpacity>
-            </View>
+                <View style={styles.footer}>
+                  <Text style={[styles.footerText, { color: themeColors.subText }]}>
+                    Don't have an account?{" "}
+                  </Text>
+                  <TouchableOpacity onPress={() => navigation.navigate("Signup")}>
+                    <Text style={styles.footerLink}>{t("signup_btn")}</Text>
+                  </TouchableOpacity>
+                </View>
+              </>
+            )}
+
+            {resetStep === "forgot" && (
+              <>
+                <View style={[
+                  styles.inputContainer,
+                  { backgroundColor: themeColors.card },
+                ]}>
+                  <Ionicons
+                    name="mail-outline"
+                    size={20}
+                    color={themeColors.subText}
+                    style={styles.icon}
+                  />
+                  <TextInput
+                    placeholder={t("email_address_placeholder")}
+                    placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                    value={email}
+                    onChangeText={setEmail}
+                    keyboardType="email-address"
+                    style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    returnKeyType="done"
+                    onSubmitEditing={handleSendResetCode}
+                  />
+                </View>
+
+                {!!errorMessage && (
+                  <Text style={{ color: "#EF4444", marginBottom: 16, textAlign: "center", fontWeight: "600" }}>
+                    {errorMessage}
+                  </Text>
+                )}
+
+                <TouchableOpacity
+                  style={[styles.button, loading && { opacity: 0.8 }]}
+                  onPress={handleSendResetCode}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.buttonText}>{t("send_reset_code")}</Text>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity style={{ marginTop: 10 }} onPress={() => { setResetStep("login"); setErrorMessage(""); }}>
+                  <Text style={{ color: themeColors.subText, textAlign: "center", textDecorationLine: "underline" }}>
+                    {t("back_to_login")}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {resetStep === "otp" && (
+              <>
+                <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+                  <Ionicons name="keypad-outline" size={20} color={themeColors.subText} style={styles.icon} />
+                  <TextInput
+                    placeholder="6-Digit OTP"
+                    placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                    value={otp}
+                    onChangeText={setOtp}
+                    keyboardType="number-pad"
+                    maxLength={6}
+                    style={[styles.input, { color: themeColors.text, letterSpacing: 8, fontSize: 20, textAlign: "center" }, Platform.OS === "web" && (styles as any).inputWeb]}
+                    returnKeyType="done"
+                    onSubmitEditing={handleVerifyOtp}
+                  />
+                </View>
+
+                {!!errorMessage && (
+                  <Text style={{ color: "#EF4444", marginBottom: 16, textAlign: "center", fontWeight: "600" }}>
+                    {errorMessage}
+                  </Text>
+                )}
+
+                <TouchableOpacity
+                  style={[styles.button, loading && { opacity: 0.8 }]}
+                  onPress={handleVerifyOtp}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.buttonText}>{t("verify_code")}</Text>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity style={{ marginTop: 10 }} onPress={() => setResetStep("login")}>
+                  <Text style={{ color: themeColors.subText, textAlign: "center", textDecorationLine: "underline" }}>
+                    {t("back_to_login")}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
+
+            {resetStep === "newPassword" && (
+              <>
+                <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+                  <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
+                  <TextInput
+                    placeholder={t("new_password_placeholder")}
+                    placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                    value={newPassword}
+                    onChangeText={setNewPassword}
+                    secureTextEntry
+                    style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                    returnKeyType="next"
+                  />
+                </View>
+                <View style={[styles.inputContainer, { backgroundColor: themeColors.card }]}>
+                  <Ionicons name="lock-closed-outline" size={20} color={themeColors.subText} style={styles.icon} />
+                  <TextInput
+                    placeholder={t("confirm_new_password_placeholder")}
+                    placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
+                    value={confirmNewPassword}
+                    onChangeText={setConfirmNewPassword}
+                    secureTextEntry
+                    style={[styles.input, { color: themeColors.text }, Platform.OS === "web" && (styles as any).inputWeb]}
+                    returnKeyType="done"
+                    onSubmitEditing={handleSaveNewPassword}
+                  />
+                </View>
+
+                {!!errorMessage && (
+                  <Text style={{ color: "#EF4444", marginBottom: 16, textAlign: "center", fontWeight: "600" }}>
+                    {errorMessage}
+                  </Text>
+                )}
+
+                <TouchableOpacity
+                  style={[styles.button, loading && { opacity: 0.8 }]}
+                  onPress={handleSaveNewPassword}
+                  disabled={loading}
+                >
+                  {loading ? (
+                    <ActivityIndicator color="#fff" />
+                  ) : (
+                    <Text style={styles.buttonText}>{t("save_new_password")}</Text>
+                  )}
+                </TouchableOpacity>
+
+                <TouchableOpacity 
+                  style={{ marginTop: 10 }} 
+                  onPress={async () => {
+                    setLoading(true);
+                    await logout();
+                    setLoading(false);
+                    setResetStep("login");
+                    setErrorMessage("");
+                  }}
+                  disabled={loading}
+                >
+                  <Text style={{ color: themeColors.subText, textAlign: "center", textDecorationLine: "underline" }}>
+                    {t("cancel_back_to_login")}
+                  </Text>
+                </TouchableOpacity>
+              </>
+            )}
           </View>
         </View>
       </ScrollView>

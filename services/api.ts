@@ -690,4 +690,24 @@ export const warmUpBackend = async (): Promise<void> => {
   }
 };
 
+export interface SupportTicketRequest {
+  ticket_type: string;
+  email: string;
+  message: string;
+}
+
+/**
+ * Submits a help/support ticket which the backend emails to the admin
+ */
+export const submitSupportTicket = async (data: SupportTicketRequest): Promise<{ success: boolean; message: string }> => {
+  try {
+    console.log("[API] submitSupportTicket called for email:", data.email);
+    const response = await api.post("/submit-support-ticket", data);
+    return response.data;
+  } catch (error) {
+    console.error("[API] submitSupportTicket error:", error);
+    throw error;
+  }
+};
+
 export default api;

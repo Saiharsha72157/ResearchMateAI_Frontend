@@ -7,7 +7,10 @@ import { useAppTheme } from '../services/ThemeContext';
 import { Paper } from '../services/researchApi';
 import { toggleFavorite, isFavorite } from '../services/researchStorage';
 
+import { useTranslation } from '../services/localization';
+
 export default function PaperIntelligenceScreen() {
+  const { t } = useTranslation();
   const { themeColors } = useAppTheme();
   const route = useRoute<any>();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
@@ -41,9 +44,6 @@ export default function PaperIntelligenceScreen() {
     }
   };
 
-  const navigateToAnalysis = (type: string) => {
-    navigation.navigate('ResearchAiAnalysis', { paper, analysisType: type });
-  };
 
   if (!paper) return null;
 
@@ -53,7 +53,7 @@ export default function PaperIntelligenceScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={themeColors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: themeColors.text }]}>Paper Intelligence</Text>
+        <Text style={[styles.headerTitle, { color: themeColors.text }]}>{t("paper_intelligence_title")}</Text>
         <TouchableOpacity onPress={handleToggleFavorite}>
           <Ionicons name={isFavoriteState ? "heart" : "heart-outline"} size={24} color={isFavoriteState ? "red" : themeColors.text} />
         </TouchableOpacity>
@@ -84,40 +84,18 @@ export default function PaperIntelligenceScreen() {
         </TouchableOpacity>
 
         <View style={[styles.section, { borderTopColor: themeColors.border }]}>
-          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Abstract</Text>
+          <Text style={[styles.sectionTitle, { color: themeColors.text }]}>{t("abstract_title")}</Text>
           <Text style={[styles.abstract, { color: themeColors.text }]}>
             {paper.abstract || 'No abstract available.'}
           </Text>
         </View>
 
-        {paper.isOpenAccess && (
-          <View style={[styles.section, { borderTopColor: themeColors.border }]}>
-            <Text style={[styles.sectionTitle, { color: themeColors.text }]}>AI Research Analysis</Text>
-            <View style={styles.actionGrid}>
-              <ActionCard icon="bulb" label="Key Insights" color="#FF9800" onPress={() => navigateToAnalysis('insights')} />
-              <ActionCard icon="document-text" label="Summarize" color="#2196F3" onPress={() => navigateToAnalysis('summarize')} />
-            </View>
-          </View>
-        )}
+
       </ScrollView>
     </SafeAreaView>
   );
 }
 
-function ActionCard({ icon, label, color, onPress }: { icon: any, label: string, color: string, onPress: () => void }) {
-  const { themeColors } = useAppTheme();
-  return (
-    <TouchableOpacity 
-      style={[styles.actionCard, { backgroundColor: themeColors.card, borderColor: themeColors.border }]}
-      onPress={onPress}
-    >
-      <View style={[styles.iconCircle, { backgroundColor: `${color}20` }]}>
-        <Ionicons name={icon} size={24} color={color} />
-      </View>
-      <Text style={[styles.actionLabel, { color: themeColors.text }]}>{label}</Text>
-    </TouchableOpacity>
-  );
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -186,31 +164,5 @@ const styles = StyleSheet.create({
   abstract: {
     fontSize: 15,
     lineHeight: 24,
-  },
-  actionGrid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  actionCard: {
-    width: '48%',
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
-    alignItems: 'center',
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: 12,
-  },
-  actionLabel: {
-    fontSize: 14,
-    fontWeight: '600',
-    textAlign: 'center',
   }
 });

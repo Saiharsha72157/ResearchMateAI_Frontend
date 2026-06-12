@@ -12,6 +12,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { ThemeProvider } from "./services/ThemeContext";
 import { AuthProvider } from "./services/AuthContext";
 import { warmUpBackend } from "./services/api";
+import { initLanguage } from "./services/localization";
 
 const linking: any = {
   prefixes: ["https://researchmateai.netlify.app", "researchmateai://"],
@@ -62,6 +63,9 @@ export default function App() {
 
     // Proactively warm up sleeping Render server containers in the background!
     warmUpBackend();
+
+    // Initialize persisted language
+    initLanguage();
   }, []);
 
   return (

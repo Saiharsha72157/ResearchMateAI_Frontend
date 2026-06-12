@@ -20,6 +20,9 @@ type AuthContextType = {
   logout: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
   refreshProfile: () => Promise<void>;
+  verifyOtp: (email: string, token: string, type: "signup" | "recovery") => Promise<void>;
+  resendOtp: (email: string, type: "signup") => Promise<void>;
+  updatePassword: (password: string) => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -143,12 +146,41 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     } else {
       setUser(null);
     }
+    ignoreSessionChange.current = false;
   };
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: "researchmateai://reset-password",
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
+    if (error) {
+      throw new Error(error.message);
+    }
+  };
+
+  const verifyOtp = async (email: string, token: string, type: "signup" | "recovery") => {
+    if (type === "recovery") {
+      ignoreSessionChange.current = true;
+    }
+    const { error } = await supabase.auth.verifyOtp({ email, token, type });
+    if (error) {
+      if (type === "recovery") {
+        ignoreSessionChange.current = false;
+      }
+      throw new Error(error.message);
+    }
+  };
+
+  const resendOtp = async (email: string, type: "signup") => {
+    const { error } = await supabase.auth.resend({
+      type,
+      email,
     });
+    if (error) {
+      throw new Error(error.message);
+    }
+  };
+
+  const updatePassword = async (password: string) => {
+    const { error } = await supabase.auth.updateUser({ password });
     if (error) {
       throw new Error(error.message);
     }
@@ -162,7 +194,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, resetPassword, refreshProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, resetPassword, refreshProfile, verifyOtp, resendOtp, updatePassword }}>
       {children}
     </AuthContext.Provider>
   );

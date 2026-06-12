@@ -7,7 +7,10 @@ import { useAppTheme } from '../services/ThemeContext';
 import { getFavorites } from '../services/researchStorage';
 import ResearchVisualAnalytics from '../components/ResearchVisualAnalytics';
 
+import { useTranslation } from '../services/localization';
+
 export default function ResearchDashboardScreen() {
+  const { t } = useTranslation();
   const { themeColors } = useAppTheme();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const isFocused = useIsFocused();
@@ -49,7 +52,7 @@ export default function ResearchDashboardScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color={themeColors.text} />
         </TouchableOpacity>
-        <Text style={[styles.headerTitle, { color: themeColors.text }]}>Research Dashboard</Text>
+        <Text style={[styles.headerTitle, { color: themeColors.text }]}>{t("research_dashboard_title")}</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -64,7 +67,7 @@ export default function ResearchDashboardScreen() {
         >
           <View style={styles.listCardLeft}>
             <Ionicons name="heart" size={24} color="#E91E63" />
-            <Text style={[styles.listCardTitle, { color: themeColors.text }]}>Favorite Papers</Text>
+            <Text style={[styles.listCardTitle, { color: themeColors.text }]}>{t("favorite_papers_title")}</Text>
           </View>
           <Ionicons name={showFavorites ? "chevron-down" : "chevron-forward"} size={20} color={themeColors.subText} />
         </TouchableOpacity>

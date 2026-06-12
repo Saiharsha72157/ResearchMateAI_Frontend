@@ -1,12 +1,31 @@
 import { useState, useEffect } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export let currentLanguage = "English";
 const listeners = new Set<(lang: string) => void>();
 
-export const setCurrentLanguage = (lang: string) => {
+export const initLanguage = async () => {
+  try {
+    const saved = await AsyncStorage.getItem("app_language");
+    if (saved && translations[saved]) {
+      currentLanguage = saved;
+      listeners.forEach((listener) => listener(saved));
+      console.log("[Localization] Loaded persisted language:", saved);
+    }
+  } catch (e) {
+    console.log("[Localization] Failed to load language", e);
+  }
+};
+
+export const setCurrentLanguage = async (lang: string) => {
   currentLanguage = lang;
   listeners.forEach((listener) => listener(lang));
   console.log("[Localization] Globally active language updated:", currentLanguage);
+  try {
+    await AsyncStorage.setItem("app_language", lang);
+  } catch (e) {
+    console.log("[Localization] Failed to save language", e);
+  }
 };
 
 export const translations: Record<string, Record<string, string>> = {
@@ -152,6 +171,13 @@ export const translations: Record<string, Record<string, string>> = {
     "reuse": "Reuse",
     "done": "Done",
 
+    // Research Explorer Screen
+    "research_explorer": "Research Explorer",
+    "search_papers_placeholder": "Search papers, authors, DOI...",
+    "trending_topics": "Trending Topics",
+    "research": "Research",
+    "explore_research_papers": "Explore Research Papers",
+
     // Profile Screen
     "profile_header": "Profile",
     "preferences": "Preferences",
@@ -192,7 +218,46 @@ export const translations: Record<string, Record<string, string>> = {
     "invalid_email": "Invalid Email",
     "invalid_email_message": "Please enter a valid email address.",
     "ticket_submitted": "Ticket Submitted",
-    "ticket_submitted_message": "Your support request has been registered. Our support team will contact you shortly!"
+    "ticket_submitted_message": "Your support request has been registered. Our support team will contact you shortly!",
+
+    // Additions for missing strings
+    "email_address_placeholder": "Email Address",
+    "password_placeholder": "Password",
+    "first_name_placeholder": "First Name",
+    "last_name_placeholder": "Last Name",
+    "username_placeholder": "Username",
+    "mobile_number_placeholder": "Mobile Number",
+    "confirm_password_placeholder": "Confirm Password",
+    "forgot_password_btn": "Forgot Password?",
+    "send_reset_code": "Send Reset Code",
+    "verify_code": "Verify Code",
+    "new_password_placeholder": "New Password",
+    "confirm_new_password_placeholder": "Confirm New Password",
+    "save_new_password": "Save New Password",
+    "cancel_back_to_login": "Cancel & Back to Login",
+    "back_to_login": "Back to Login",
+    "login_btn": "Login",
+    "signup_btn": "Sign Up",
+    "verify_otp_btn": "Verify OTP",
+    "full_name_placeholder": "Full Name",
+    "bio_placeholder": "Bio (e.g. Data Scientist / AI Researcher)",
+    "save_profile_btn": "Save Profile",
+    "search_saved_placeholder": "Search by title, domain, dept...",
+    "open_plan_btn": "Open Plan",
+    "research_dashboard_title": "Research Dashboard",
+    "favorite_papers_title": "Favorite Papers",
+    "paper_intelligence_title": "Paper Intelligence",
+    "abstract_title": "Abstract",
+    "key_findings_title": "Key Findings",
+    "contributions_title": "Contributions",
+    "configure_graph_labels": "Configure Graph Labels",
+    "graph_title_label": "Graph Title",
+    "x_axis_label": "X-Axis Label",
+    "y_axis_label": "Y-Axis Label",
+    "graph_title_placeholder": "e.g. Comparison graph",
+    "x_axis_placeholder": "e.g. Parameters",
+    "y_axis_placeholder": "e.g. Value",
+    "save_labels_btn": "Save Labels"
   },
   Hindi: {
     // Navigation / Tabs
@@ -254,6 +319,8 @@ export const translations: Record<string, Record<string, string>> = {
     "empty_state_sub": "अपना विभाग और डोमेन चुनें, फिर शीर्षक उत्पन्न करें पर टैप करें।",
     "select_dept_modal": "विभाग चुनें",
     "select_domain_modal": "डोमेन चुनें",
+    "research": "अनुसंधान",
+    "explore_research_papers": "शोध पत्रों का अन्वेषण करें",
 
     // Dataset Screen
     "discover_datasets": "डेटासेट खोजें",
@@ -376,7 +443,46 @@ export const translations: Record<string, Record<string, string>> = {
     "invalid_email": "अमान्य ईमेल",
     "invalid_email_message": "कृपया एक मान्य ईमेल पता दर्ज करें।",
     "ticket_submitted": "टिकट जमा किया गया",
-    "ticket_submitted_message": "आपका सहायता अनुरोध दर्ज कर लिया गया है। हमारी सहायता टीम जल्द ही आपसे संपर्क करेगी!"
+    "ticket_submitted_message": "आपका सहायता अनुरोध दर्ज कर लिया गया है। हमारी सहायता टीम जल्द ही आपसे संपर्क करेगी!",
+
+    // Additions for missing strings
+    "email_address_placeholder": "ईमेल पता",
+    "password_placeholder": "पासवर्ड",
+    "first_name_placeholder": "पहला नाम",
+    "last_name_placeholder": "अंतिम नाम",
+    "username_placeholder": "उपयोगकर्ता नाम",
+    "mobile_number_placeholder": "मोबाइल नंबर",
+    "confirm_password_placeholder": "पासवर्ड की पुष्टि करें",
+    "forgot_password_btn": "पासवर्ड भूल गए?",
+    "send_reset_code": "रीसेट कोड भेजें",
+    "verify_code": "कोड सत्यापित करें",
+    "new_password_placeholder": "नया पासवर्ड",
+    "confirm_new_password_placeholder": "नया पासवर्ड की पुष्टि करें",
+    "save_new_password": "नया पासवर्ड सहेजें",
+    "cancel_back_to_login": "रद्द करें और लॉगिन पर वापस जाएं",
+    "back_to_login": "लॉगिन पर वापस जाएं",
+    "login_btn": "लॉगिन",
+    "signup_btn": "साइन अप",
+    "verify_otp_btn": "ओटीपी सत्यापित करें",
+    "full_name_placeholder": "पूरा नाम",
+    "bio_placeholder": "बायो (उदा. डेटा साइंटिस्ट)",
+    "save_profile_btn": "प्रोफ़ाइल सहेजें",
+    "search_saved_placeholder": "शीर्षक, डोमेन, विभाग द्वारा खोजें...",
+    "open_plan_btn": "योजना खोलें",
+    "research_dashboard_title": "अनुसंधान डैशबोर्ड",
+    "favorite_papers_title": "पसंदीदा पेपर",
+    "paper_intelligence_title": "पेपर इंटेलिजेंस",
+    "abstract_title": "सार",
+    "key_findings_title": "मुख्य निष्कर्ष",
+    "contributions_title": "योगदान",
+    "configure_graph_labels": "ग्राफ लेबल कॉन्फ़िगर करें",
+    "graph_title_label": "ग्राफ का शीर्षक",
+    "x_axis_label": "एक्स-एक्सिस लेबल",
+    "y_axis_label": "वाई-एक्सिस लेबल",
+    "graph_title_placeholder": "उदा. तुलना ग्राफ",
+    "x_axis_placeholder": "उदा. पैरामीटर",
+    "y_axis_placeholder": "उदा. मूल्य",
+    "save_labels_btn": "लेबल सहेजें"
   },
   Telugu: {
     // Navigation / Tabs
@@ -438,6 +544,8 @@ export const translations: Record<string, Record<string, string>> = {
     "empty_state_sub": "మీ విభాగం మరియు రంగాన్ని ఎంచుకోండి, ఆపై శీర్షికలను సృష్టించండి నొక్కండి.",
     "select_dept_modal": "విభాగం ఎంచుకోండి",
     "select_domain_modal": "రంగం ఎంచుకోండి",
+    "research": "పరిశోధన",
+    "explore_research_papers": "పరిశోధనా పత్రాలను అన్వేషించండి",
 
     // Dataset Screen
     "discover_datasets": "డేటాసెట్లను కనుగొనండి",
@@ -560,7 +668,46 @@ export const translations: Record<string, Record<string, string>> = {
     "invalid_email": "చెల్లని ఈమెయిల్",
     "invalid_email_message": "దయచేసి చెల్లుబాటు అయ్యే ఈమెయిల్ చిరునామాను నమోదు చేయండి.",
     "ticket_submitted": "టికెట్ సమర్పించబడింది",
-    "ticket_submitted_message": "మీ మద్దతు అభ్యర్థన నమోదు చేయబడింది. మా మద్దతు బృందం త్వరలో మిమ్మల్ని సంప్రదిస్తుంది!"
+    "ticket_submitted_message": "మీ మద్దతు అభ్యర్థన నమోదు చేయబడింది. మా మద్దతు బృందం త్వరలో మిమ్మల్ని సంప్రదిస్తుంది!",
+
+    // Additions for missing strings
+    "email_address_placeholder": "ఇమెయిల్ చిరునామా",
+    "password_placeholder": "పాస్‌వర్డ్",
+    "first_name_placeholder": "మొదటి పేరు",
+    "last_name_placeholder": "చివరి పేరు",
+    "username_placeholder": "వినియోగదారు పేరు",
+    "mobile_number_placeholder": "మొబైల్ నంబర్",
+    "confirm_password_placeholder": "పాస్‌వర్డ్‌ను నిర్ధారించండి",
+    "forgot_password_btn": "పాస్‌వర్డ్ మర్చిపోయారా?",
+    "send_reset_code": "రీసెట్ కోడ్ పంపండి",
+    "verify_code": "కోడ్ ధృవీకరించండి",
+    "new_password_placeholder": "కొత్త పాస్‌వర్డ్",
+    "confirm_new_password_placeholder": "కొత్త పాస్‌వర్డ్‌ను నిర్ధారించండి",
+    "save_new_password": "కొత్త పాస్‌వర్డ్ సేవ్ చేయండి",
+    "cancel_back_to_login": "రద్దు చేయి & లాగిన్‌కు తిరిగి వెళ్ళు",
+    "back_to_login": "లాగిన్‌కు తిరిగి వెళ్ళు",
+    "login_btn": "లాగిన్",
+    "signup_btn": "సైన్ అప్",
+    "verify_otp_btn": "OTP ని ధృవీకరించండి",
+    "full_name_placeholder": "పూర్తి పేరు",
+    "bio_placeholder": "బయో (ఉదా. డేటా సైంటిస్ట్)",
+    "save_profile_btn": "ప్రొఫైల్ సేవ్ చేయండి",
+    "search_saved_placeholder": "శీర్షిక, డొమైన్, డిపార్ట్‌మెంట్ ద్వారా శోధించండి...",
+    "open_plan_btn": "ప్రణాళికను తెరవండి",
+    "research_dashboard_title": "పరిశోధన డాష్‌బోర్డ్",
+    "favorite_papers_title": "ఇష్టమైన పేపర్లు",
+    "paper_intelligence_title": "పేపర్ ఇంటెలిజెన్స్",
+    "abstract_title": "సారాంశం",
+    "key_findings_title": "ముఖ్య అన్వేషణలు",
+    "contributions_title": "సహకారం",
+    "configure_graph_labels": "గ్రాఫ్ లేబుల్‌లను కాన్ఫిగర్ చేయండి",
+    "graph_title_label": "గ్రాఫ్ శీర్షిక",
+    "x_axis_label": "X-యాక్సిస్ లేబుల్",
+    "y_axis_label": "Y-యాక్సిస్ లేబుల్",
+    "graph_title_placeholder": "ఉదా. పోలిక గ్రాఫ్",
+    "x_axis_placeholder": "ఉదా. పారామితులు",
+    "y_axis_placeholder": "ఉదా. విలువ",
+    "save_labels_btn": "లేబుల్‌లను సేవ్ చేయండి"
   },
   Tamil: {
     // Navigation / Tabs
@@ -622,6 +769,8 @@ export const translations: Record<string, Record<string, string>> = {
     "empty_state_sub": "உங்கள் துறை மற்றும் களத்தைத் தேர்ந்தெடுத்து, தலைப்புகளை உருவாக்கு என்பதைத் தட்டவும்.",
     "select_dept_modal": "துறையைத் தேர்ந்தெடுக்கவும்",
     "select_domain_modal": "களத்தைத் தேர்ந்தெடுக்கவும்",
+    "research": "ஆராய்ச்சி",
+    "explore_research_papers": "ஆராய்ச்சி கட்டுரைகளை ஆராயுங்கள்",
 
     // Dataset Screen
     "discover_datasets": "தரவுத்தொகுப்புகளைக் கண்டறியவும்",
@@ -744,7 +893,46 @@ export const translations: Record<string, Record<string, string>> = {
     "invalid_email": "தவறான மின்னஞ்சல்",
     "invalid_email_message": "முறையான மின்னஞ்சல் முகவரியை உள்ளிடவும்.",
     "ticket_submitted": "கோரிக்கை சமர்ப்பிக்கப்பட்டது",
-    "ticket_submitted_message": "உங்கள் உதவிக் கோரிக்கை பதிவு செய்யப்பட்டுள்ளது. எங்கள் ஆதரவுக் குழு விரைவில் உங்களைத் தொடர்பு கொள்ளும்!"
+    "ticket_submitted_message": "உங்கள் உதவிக் கோரிக்கை பதிவு செய்யப்பட்டுள்ளது. எங்கள் ஆதரவுக் குழு விரைவில் உங்களைத் தொடர்பு கொள்ளும்!",
+
+    // Additions for missing strings
+    "email_address_placeholder": "மின்னஞ்சல் முகவரி",
+    "password_placeholder": "கடவுச்சொல்",
+    "first_name_placeholder": "முதல் பெயர்",
+    "last_name_placeholder": "கடைசி பெயர்",
+    "username_placeholder": "பயனர்பெயர்",
+    "mobile_number_placeholder": "கைபேசி எண்",
+    "confirm_password_placeholder": "கடவுச்சொல்லை உறுதிப்படுத்தவும்",
+    "forgot_password_btn": "கடவுச்சொல்லை மறந்துவிட்டீர்களா?",
+    "send_reset_code": "மீட்டமை குறியீட்டை அனுப்பு",
+    "verify_code": "குறியீட்டை சரிபார்க்கவும்",
+    "new_password_placeholder": "புதிய கடவுச்சொல்",
+    "confirm_new_password_placeholder": "புதிய கடவுச்சொல்லை உறுதிப்படுத்தவும்",
+    "save_new_password": "புதிய கடவுச்சொல்லை சேமிக்கவும்",
+    "cancel_back_to_login": "ரத்து செய்து உள்நுழைவுக்குத் திரும்பு",
+    "back_to_login": "உள்நுழைவுக்குத் திரும்பு",
+    "login_btn": "உள்நுழை",
+    "signup_btn": "பதிவுபெறு",
+    "verify_otp_btn": "OTP ஐ சரிபார்க்கவும்",
+    "full_name_placeholder": "முழு பெயர்",
+    "bio_placeholder": "சுயசரிதை (எ.கா. தரவு விஞ்ஞானி)",
+    "save_profile_btn": "சுயவிவரத்தை சேமி",
+    "search_saved_placeholder": "தலைப்பு, டொமைன், துறை மூலம் தேடுங்கள்...",
+    "open_plan_btn": "திட்டத்தைத் திற",
+    "research_dashboard_title": "ஆராய்ச்சி டாஷ்போர்டு",
+    "favorite_papers_title": "பிடித்த தாள்கள்",
+    "paper_intelligence_title": "காகித நுண்ணறிவு",
+    "abstract_title": "சுருக்கம்",
+    "key_findings_title": "முக்கிய கண்டுபிடிப்புகள்",
+    "contributions_title": "பங்களிப்புகள்",
+    "configure_graph_labels": "வரைபட லேபிள்களை உள்ளமைக்கவும்",
+    "graph_title_label": "வரைபடத்தின் தலைப்பு",
+    "x_axis_label": "X-அச்சு லேபிள்",
+    "y_axis_label": "Y-அச்சு லேபிள்",
+    "graph_title_placeholder": "எ.கா. ஒப்பீடு வரைபடம்",
+    "x_axis_placeholder": "எ.கா. அளவுருக்கள்",
+    "y_axis_placeholder": "எ.கா. மதிப்பு",
+    "save_labels_btn": "லேபிள்களைச் சேமி"
   },
   Malayalam: {
     // Navigation / Tabs
@@ -928,7 +1116,46 @@ export const translations: Record<string, Record<string, string>> = {
     "invalid_email": "തെറ്റായ ഇമെയിൽ",
     "invalid_email_message": "സാധുവായ ഒരു ഇമെയിൽ വിലാസം നൽകുക.",
     "ticket_submitted": "ടിക്കറ്റ് സമർപ്പിച്ചു",
-    "ticket_submitted_message": "നിങ്ങളുടെ സപ്പോർട്ട് റിക്വസ്റ്റ് രജിസ്റ്റർ ചെയ്തിട്ടുണ്ട്. ഞങ്ങളുടെ ടീം നിങ്ങളെ ഉടൻ ബന്ധപ്പെടും!"
+    "ticket_submitted_message": "നിങ്ങളുടെ സപ്പോർട്ട് റിക്വസ്റ്റ് രജിസ്റ്റർ ചെയ്തിട്ടുണ്ട്. ഞങ്ങളുടെ ടീം നിങ്ങളെ ഉടൻ ബന്ധപ്പെടും!",
+
+    // Additions for missing strings
+    "email_address_placeholder": "ഇമെയിൽ വിലാസം",
+    "password_placeholder": "പാസ്‌വേഡ്",
+    "first_name_placeholder": "ആദ്യത്തെ പേര്",
+    "last_name_placeholder": "അവസാന പേര്",
+    "username_placeholder": "ഉപയോക്തൃനാമം",
+    "mobile_number_placeholder": "മൊബൈൽ നമ്പർ",
+    "confirm_password_placeholder": "പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക",
+    "forgot_password_btn": "പാസ്‌വേഡ് മറന്നുപോയോ?",
+    "send_reset_code": "റീസെറ്റ് കോഡ് അയയ്ക്കുക",
+    "verify_code": "കോഡ് പരിശോധിക്കുക",
+    "new_password_placeholder": "പുതിയ പാസ്‌വേഡ്",
+    "confirm_new_password_placeholder": "പുതിയ പാസ്‌വേഡ് സ്ഥിരീകരിക്കുക",
+    "save_new_password": "പുതിയ പാസ്‌വേഡ് സംരക്ഷിക്കുക",
+    "cancel_back_to_login": "റദ്ദാക്കി ലോഗിനിലേക്ക് മടങ്ങുക",
+    "back_to_login": "ലോഗിനിലേക്ക് മടങ്ങുക",
+    "login_btn": "ലോഗിൻ",
+    "signup_btn": "സൈൻ അപ്പ്",
+    "verify_otp_btn": "OTP പരിശോധിക്കുക",
+    "full_name_placeholder": "പൂർണ്ണമായ പേര്",
+    "bio_placeholder": "ബയോ (ഉദാഹരണത്തിന്: ഡാറ്റാ സയന്റിസ്റ്റ്)",
+    "save_profile_btn": "പ്രൊഫൈൽ സംരക്ഷിക്കുക",
+    "search_saved_placeholder": "തലക്കെട്ട്, ഡൊമെയ്ൻ, വകുപ്പ് എന്നിവയിലൂടെ തിരയുക...",
+    "open_plan_btn": "പ്ലാൻ തുറക്കുക",
+    "research_dashboard_title": "ഗവേഷണ ഡാഷ്‌ബോർഡ്",
+    "favorite_papers_title": "പ്രിയപ്പെട്ട പേപ്പറുകൾ",
+    "paper_intelligence_title": "പേപ്പർ ഇന്റലിജൻസ്",
+    "abstract_title": "സംഗ്രഹം",
+    "key_findings_title": "പ്രധാന കണ്ടെത്തലുകൾ",
+    "contributions_title": "സംഭാവനകൾ",
+    "configure_graph_labels": "ഗ്രാഫ് ലേബലുകൾ കോൺഫിഗർ ചെയ്യുക",
+    "graph_title_label": "ഗ്രാഫ് ശീർഷകം",
+    "x_axis_label": "X-ആക്സിസ് ലേബൽ",
+    "y_axis_label": "Y-ആക്സിസ് ലേബൽ",
+    "graph_title_placeholder": "ഉദാഹരണത്തിന്: താരതമ്യ ഗ്രാഫ്",
+    "x_axis_placeholder": "ഉദാഹരണത്തിന്: പരാമീറ്ററുകൾ",
+    "y_axis_placeholder": "ഉദാഹരണത്തിന്: മൂല്യം",
+    "save_labels_btn": "ലേബലുകൾ സംരക്ഷിക്കുക"
   }
 };
 

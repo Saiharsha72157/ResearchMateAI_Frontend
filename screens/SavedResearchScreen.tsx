@@ -17,7 +17,10 @@ import { useNavigation, useIsFocused } from "@react-navigation/native";
 import { useAppTheme } from "../services/ThemeContext";
 import { getTitleBookmarks, removeTitleBookmark, TitleBookmark } from "../services/api";
 
+import { useTranslation } from '../services/localization';
+
 export default function SavedResearchScreen() {
+  const { t } = useTranslation();
   const navigation = useNavigation<any>();
   const isFocused = useIsFocused();
   const { darkMode, themeColors } = useAppTheme();
@@ -126,7 +129,7 @@ export default function SavedResearchScreen() {
             <Ionicons name="search-outline" size={18} color={themeColors.subText} style={styles.searchIcon} />
             <TextInput
               style={[styles.searchInput, { color: themeColors.text }]}
-              placeholder="Search by title, domain, dept..."
+              placeholder={t("search_saved_placeholder")}
               placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
               value={searchQuery}
               onChangeText={setSearchQuery}
@@ -224,7 +227,7 @@ export default function SavedResearchScreen() {
                     activeOpacity={0.8}
                   >
                     <Ionicons name="eye-outline" size={14} color="#FFF" style={styles.btnIcon} />
-                    <Text style={styles.openBtnText}>Open Plan</Text>
+                    <Text style={styles.openBtnText}>{t("open_plan_btn")}</Text>
                   </TouchableOpacity>
 
                   <TouchableOpacity
@@ -239,7 +242,7 @@ export default function SavedResearchScreen() {
                     activeOpacity={0.8}
                   >
                     <Ionicons name="trash-outline" size={14} color="#EF4444" style={styles.btnIcon} />
-                    <Text style={styles.deleteBtnText}>Delete</Text>
+                    <Text style={styles.deleteBtnText}>{t("delete")}</Text>
                   </TouchableOpacity>
                 </View>
               </View>

@@ -389,38 +389,38 @@ export default function AnalysisScreen() {
           <View style={[styles.modalContent, { backgroundColor: themeColors.card, borderColor: themeColors.border, borderWidth: isDark ? 1 : 0 }]}>
             <View style={styles.modalHeader}>
               <Ionicons name="settings-outline" size={22} color="#6C3EF4" />
-              <Text style={[styles.modalTitle, { color: themeColors.text }]}>Configure Graph Labels</Text>
+              <Text style={[styles.modalTitle, { color: themeColors.text }]}>{t("configure_graph_labels")}</Text>
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: themeColors.subText }]}>Graph Title <Text style={{ color: "#DC2626" }}>*</Text></Text>
+              <Text style={[styles.inputLabel, { color: themeColors.subText }]}>{t("graph_title_label")} <Text style={{ color: "#DC2626" }}>*</Text></Text>
               <TextInput
                 style={[styles.textInput, { color: themeColors.inputText, backgroundColor: themeColors.inputBg, borderColor: themeColors.border }]}
                 value={configTitle}
                 onChangeText={setConfigTitle}
-                placeholder="e.g. Comparison graph"
+                placeholder={t("graph_title_placeholder")}
                 placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: themeColors.subText }]}>X-Axis Label (Horizontal) <Text style={{ color: "#DC2626" }}>*</Text></Text>
+              <Text style={[styles.inputLabel, { color: themeColors.subText }]}>{t("x_axis_label")} <Text style={{ color: "#DC2626" }}>*</Text></Text>
               <TextInput
                 style={[styles.textInput, { color: themeColors.inputText, backgroundColor: themeColors.inputBg, borderColor: themeColors.border }]}
                 value={configXLabel}
                 onChangeText={setConfigXLabel}
-                placeholder="e.g. Parameters"
+                placeholder={t("x_axis_placeholder")}
                 placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
               />
             </View>
 
             <View style={styles.inputGroup}>
-              <Text style={[styles.inputLabel, { color: themeColors.subText }]}>Y-Axis Label (Vertical) <Text style={{ color: "#DC2626" }}>*</Text></Text>
+              <Text style={[styles.inputLabel, { color: themeColors.subText }]}>{t("y_axis_label")} <Text style={{ color: "#DC2626" }}>*</Text></Text>
               <TextInput
                 style={[styles.textInput, { color: themeColors.inputText, backgroundColor: themeColors.inputBg, borderColor: themeColors.border }]}
                 value={configYLabel}
                 onChangeText={setConfigYLabel}
-                placeholder="e.g. Value"
+                placeholder={t("y_axis_placeholder")}
                 placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
               />
             </View>

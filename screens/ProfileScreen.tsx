@@ -130,7 +130,7 @@ export default function ProfileScreen() {
           </View>
 
           <Text style={styles.name}>
-            {user?.fullName || user?.username || "Researcher"}
+            {user?.fullName || user?.username || t("researcher")}
           </Text>
 
           {!!user?.fullName && !!user?.username && (
@@ -222,7 +222,7 @@ export default function ProfileScreen() {
               />
 
               <Text style={[styles.rowText, { color: themeColors.text }]}>
-                Saved Research Plans
+                {t("saved_research_plans")}
               </Text>
 
             </View>
@@ -327,11 +327,11 @@ export default function ProfileScreen() {
             <ScrollView showsVerticalScrollIndicator={false}>
               <View style={styles.settingsGroup}>
                 <Text style={[styles.settingsGroupTitle, { color: themeColors.primary, marginBottom: 15 }]}>
-                  Personal Information
+                  {t("personal_information")}
                 </Text>
 
                 <TextInput
-                  placeholder="Full Name"
+                  placeholder={t("full_name_placeholder")}
                   placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
                   value={fullName}
                   onChangeText={setFullName}
@@ -343,7 +343,7 @@ export default function ProfileScreen() {
                 />
 
                 <TextInput
-                  placeholder="Username"
+                  placeholder={t("username_placeholder")}
                   placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
                   value={username}
                   onChangeText={setUsername}
@@ -356,7 +356,7 @@ export default function ProfileScreen() {
                 />
 
                 <TextInput
-                  placeholder="Mobile Number"
+                  placeholder={t("mobile_number_placeholder")}
                   placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
                   value={mobile}
                   onChangeText={setMobile}
@@ -370,7 +370,7 @@ export default function ProfileScreen() {
                 />
 
                 <TextInput
-                  placeholder="Bio (e.g. Data Scientist / AI Researcher)"
+                  placeholder={t("bio_placeholder")}
                   placeholderTextColor={isDark ? "#6B7280" : "#9CA3AF"}
                   value={bio}
                   onChangeText={setBio}
@@ -392,7 +392,7 @@ export default function ProfileScreen() {
                 {updating ? (
                   <ActivityIndicator color="#fff" />
                 ) : (
-                  <Text style={styles.submitBtnText}>Save Profile</Text>
+                  <Text style={styles.submitBtnText}>{t("save_profile_btn")}</Text>
                 )}
               </TouchableOpacity>
             </ScrollView>

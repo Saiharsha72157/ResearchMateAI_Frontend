@@ -65,8 +65,8 @@ export default function DashboardScreen() {
     },
 
     {
-      title: "Research",
-      subtitle: "Explore Research Papers",
+      title: t("research"),
+      subtitle: t("explore_research_papers"),
       icon: "library-outline",
       screen: "Research",
       type: "tab",

@@ -37,7 +37,7 @@ export default function ResearchExplorerScreen() {
   return (
     <SafeAreaView style={[styles.container, { backgroundColor: themeColors.background }]}>
       <View style={styles.header}>
-        <Text style={[styles.headerTitle, { color: themeColors.text }]}>Research Explorer</Text>
+        <Text style={[styles.headerTitle, { color: themeColors.text }]}>{t("research_explorer")}</Text>
         <TouchableOpacity onPress={() => navigation.navigate('ResearchDashboard')}>
           <Ionicons name="stats-chart" size={24} color={themeColors.text} />
         </TouchableOpacity>
@@ -48,7 +48,7 @@ export default function ResearchExplorerScreen() {
           <Ionicons name="search" size={20} color={themeColors.subText} style={styles.searchIcon} />
           <TextInput
             style={[styles.input, { color: themeColors.text }]}
-            placeholder="Search papers, authors, DOI..."
+            placeholder={t("search_papers_placeholder")}
             placeholderTextColor={themeColors.subText}
             value={query}
             onChangeText={setQuery}
@@ -65,7 +65,7 @@ export default function ResearchExplorerScreen() {
       </View>
 
       <View style={styles.trendingSection}>
-        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>Trending Topics</Text>
+        <Text style={[styles.sectionTitle, { color: themeColors.text }]}>{t("trending_topics")}</Text>
         <View style={styles.topicsContainer}>
           {trendingTopics.map((topic, index) => (
             <TouchableOpacity 

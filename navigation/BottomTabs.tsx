@@ -102,7 +102,7 @@ export default function BottomTabs() {
         name="Research"
         component={ResearchExplorerScreen}
         options={{
-          tabBarLabel: t("research", { defaultValue: "Research" })
+          tabBarLabel: t("research")
         }}
       />
 
